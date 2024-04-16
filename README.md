@@ -4,5 +4,5 @@
 
 Authors:
 Byron Josh Cuachin
-
+Samuel Landoch
 
