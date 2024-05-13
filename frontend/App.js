@@ -22,11 +22,12 @@
 import React from 'react';
 import { View } from 'react-native';
 import LoginScreen from './src/login';
+import ProfileForm from './src/profileform';
 
 const App = () => {
     return (
         <View style={{ flex: 1 }}>
-            <LoginScreen />
+            <ProfileForm />
         </View>
     );
 };
