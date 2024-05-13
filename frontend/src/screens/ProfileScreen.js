@@ -226,3 +226,4 @@ const styles = {
         cursor: 'pointer'
     }
 };
+
