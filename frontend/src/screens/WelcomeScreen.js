@@ -3,6 +3,8 @@ import React, { useCallback } from "react";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen";
+import { Image } from 'react-native';
+
 
 export default function WelcomeScreen(){
     const [fontsLoaded, fontError] = useFonts({
