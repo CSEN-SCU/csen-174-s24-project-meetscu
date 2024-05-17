@@ -26,8 +26,15 @@ export default function AppNavigation() {
     
       return <NavigationContainer>
         <Stack.Navigator
-          initailRouteName="Welcome"
-          screenOptions={{ headerShown: false }}
+          initialRouteName="Welcome"
+          screenOptions={{ 
+            "tabBarStyle": [
+              {
+                "display": "flex"
+              },
+              null
+            ]
+          }}
           >
           <Stack.Screen 
             name="Welcome" 
