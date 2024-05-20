@@ -12,6 +12,7 @@
 
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
 
 export default function ProfileScreen() {
     const [interests, setInterests] = useState({
@@ -19,11 +20,35 @@ export default function ProfileScreen() {
         gym: false,
         eating: false
     });
+    const [interestLevels, setInterestLevels] = useState({
+        running: '',
+        gym: '',
+        eating: ''
+    });
+    const [desiredInterestLevels, setDesiredInterestLevels] = useState({
+        running: '',
+        gym: '',
+        eating: ''
+    });
 
     const handleCheckboxChange = (interest) => {
         setInterests({
             ...interests,
             [interest]: !interests[interest]
+        });
+    };
+
+    const handleInterestLevelChange = (interest, level) => {
+        setInterestLevels({
+            ...interestLevels,
+            [interest]: level
+        });
+    };
+
+    const handleDesiredInterestLevelChange = (interest, level) => {
+        setDesiredInterestLevels({
+            ...desiredInterestLevels,
+            [interest]: level
         });
     };
 
@@ -40,19 +65,27 @@ export default function ProfileScreen() {
                 {interests.running && (
                     <View style={styles.dropdown}>
                         <Text>Interest Level:</Text>
-                        <select name="running_interest" style={styles.select}>
-                            <option value="1">Not interested</option>
-                            <option value="2">Somewhat interested</option>
-                            <option value="3">Interested</option>
-                            <option value="4">Very interested</option>
-                        </select>
+                        <Picker
+                            selectedValue={interestLevels.running}
+                            style={styles.select}
+                            onValueChange={(itemValue) => handleInterestLevelChange('running', itemValue)}
+                        >
+                            <Picker.Item label="Not interested" value="1" />
+                            <Picker.Item label="Somewhat interested" value="2" />
+                            <Picker.Item label="Interested" value="3" />
+                            <Picker.Item label="Very interested" value="4" />
+                        </Picker>
                         <Text>Desired Interest:</Text>
-                        <select name="running_desired_interest" style={styles.select}>
-                            <option value="1">Not important</option>
-                            <option value="2">Somewhat important</option>
-                            <option value="3">Important</option>
-                            <option value="4">Very important</option>
-                        </select>
+                        <Picker
+                            selectedValue={desiredInterestLevels.running}
+                            style={styles.select}
+                            onValueChange={(itemValue) => handleDesiredInterestLevelChange('running', itemValue)}
+                        >
+                            <Picker.Item label="Not important" value="1" />
+                            <Picker.Item label="Somewhat important" value="2" />
+                            <Picker.Item label="Important" value="3" />
+                            <Picker.Item label="Very important" value="4" />
+                        </Picker>
                     </View>
                 )}
 
@@ -65,19 +98,27 @@ export default function ProfileScreen() {
                 {interests.gym && (
                     <View style={styles.dropdown}>
                         <Text>Interest Level:</Text>
-                        <select name="gym_interest" style={styles.select}>
-                            <option value="1">Not interested</option>
-                            <option value="2">Somewhat interested</option>
-                            <option value="3">Interested</option>
-                            <option value="4">Very interested</option>
-                        </select>
+                        <Picker
+                            selectedValue={interestLevels.gym}
+                            style={styles.select}
+                            onValueChange={(itemValue) => handleInterestLevelChange('gym', itemValue)}
+                        >
+                            <Picker.Item label="Not interested" value="1" />
+                            <Picker.Item label="Somewhat interested" value="2" />
+                            <Picker.Item label="Interested" value="3" />
+                            <Picker.Item label="Very interested" value="4" />
+                        </Picker>
                         <Text>Desired Interest:</Text>
-                        <select name="gym_desired_interest" style={styles.select}>
-                            <option value="1">Not important</option>
-                            <option value="2">Somewhat important</option>
-                            <option value="3">Important</option>
-                            <option value="4">Very important</option>
-                        </select>
+                        <Picker
+                            selectedValue={desiredInterestLevels.gym}
+                            style={styles.select}
+                            onValueChange={(itemValue) => handleDesiredInterestLevelChange('gym', itemValue)}
+                        >
+                            <Picker.Item label="Not important" value="1" />
+                            <Picker.Item label="Somewhat important" value="2" />
+                            <Picker.Item label="Important" value="3" />
+                            <Picker.Item label="Very important" value="4" />
+                        </Picker>
                     </View>
                 )}
 
@@ -90,19 +131,27 @@ export default function ProfileScreen() {
                 {interests.eating && (
                     <View style={styles.dropdown}>
                         <Text>Interest Level:</Text>
-                        <select name="eating_interest" style={styles.select}>
-                            <option value="1">Not interested</option>
-                            <option value="2">Somewhat interested</option>
-                            <option value="3">Interested</option>
-                            <option value="4">Very interested</option>
-                        </select>
+                        <Picker
+                            selectedValue={interestLevels.eating}
+                            style={styles.select}
+                            onValueChange={(itemValue) => handleInterestLevelChange('eating', itemValue)}
+                        >
+                            <Picker.Item label="Not interested" value="1" />
+                            <Picker.Item label="Somewhat interested" value="2" />
+                            <Picker.Item label="Interested" value="3" />
+                            <Picker.Item label="Very interested" value="4" />
+                        </Picker>
                         <Text>Desired Interest:</Text>
-                        <select name="eating_desired_interest" style={styles.select}>
-                            <option value="1">Not important</option>
-                            <option value="2">Somewhat important</option>
-                            <option value="3">Important</option>
-                            <option value="4">Very important</option>
-                        </select>
+                        <Picker
+                            selectedValue={desiredInterestLevels.eating}
+                            style={styles.select}
+                            onValueChange={(itemValue) => handleDesiredInterestLevelChange('eating', itemValue)}
+                        >
+                            <Picker.Item label="Not important" value="1" />
+                            <Picker.Item label="Somewhat important" value="2" />
+                            <Picker.Item label="Important" value="3" />
+                            <Picker.Item label="Very important" value="4" />
+                        </Picker>
                     </View>
                 )}
 
@@ -159,3 +208,4 @@ const styles = StyleSheet.create({
         fontSize: 16,
     },
 });
+
