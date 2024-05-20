@@ -67,7 +67,7 @@ export default function AppNavigation() {
   return (
     <NavigationContainer>
       <Tab.Navigator>
-        <Tab.Screen name="Home" component={HomeScreen} />
+        <Tab.Screen name="Meet!" component={HomeScreen} />
         <Tab.Screen name="Chat" component={ChatScreen} />
         <Tab.Screen name="Profile" component={ProfileScreen} />
       </Tab.Navigator>
