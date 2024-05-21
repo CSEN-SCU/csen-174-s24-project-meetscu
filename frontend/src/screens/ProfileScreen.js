@@ -210,10 +210,10 @@ const styles = StyleSheet.create({
 });
 
 
-export default function ProfileScreen(){
-    return (
-        <View>
-            <Text>ProfileScreen</Text>
-        </View>
-    )
-}
+// export default function ProfileScreen(){
+//     return (
+//         <View>
+//             <Text>ProfileScreen</Text>
+//         </View>
+//     )
+// }

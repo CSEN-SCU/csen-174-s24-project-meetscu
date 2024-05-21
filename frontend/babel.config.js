@@ -10,8 +10,15 @@ module.exports = function(api) {
           moduleName: '@env',
           path: '.env',
         },
-      ]
+      ],
       ['nativewind/babel'],
+      [
+      "module-resolver",
+        {
+          extensions: [".tsx", ".ts", ".js", ".json"],
+        },
+      ],
+      "react-native-reanimated/plugin",
     ],
   };
 };
