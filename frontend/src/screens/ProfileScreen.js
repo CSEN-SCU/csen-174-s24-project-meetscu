@@ -155,31 +155,33 @@ export default function ProfileScreen() {
                     <Text style={styles.checkboxLabel}>Eating</Text>
                 </TouchableOpacity>
                 {interests.eating && (
-                    <View style={styles.dropdown}>
-                        <Text>Interest Level:</Text>
-                        <Picker
-                            selectedValue={interestLevels.eating}
-                            style={styles.select}
-                            onValueChange={(itemValue) => handleInterestLevelChange('eating', itemValue)}
-                        >
-                            <Picker.Item label="Not interested" value="1" />
-                            <Picker.Item label="Somewhat interested" value="2" />
-                            <Picker.Item label="Interested" value="3" />
-                            <Picker.Item label="Very interested" value="4" />
-                        </Picker>
-                        <Text>Desired Interest:</Text>
-                        <Picker
-                            selectedValue={desiredInterestLevels.eating}
-                            style={styles.select}
-                            onValueChange={(itemValue) => handleDesiredInterestLevelChange('eating', itemValue)}
-                        >
-                            <Picker.Item label="Not important" value="1" />
-                            <Picker.Item label="Somewhat important" value="2" />
-                            <Picker.Item label="Important" value="3" />
-                            <Picker.Item label="Very important" value="4" />
-                        </Picker>
-                    </View>
-                )}
+    <div style={styles.dropdown}>
+        <label>
+            Interest Level:
+            <select
+                value={interestLevels.eating}
+                onChange={(e) => handleInterestLevelChange('eating', e.target.value)}
+            >
+                <option value="1">Not interested</option>
+                <option value="2">Somewhat interested</option>
+                <option value="3">Interested</option>
+                <option value="4">Very interested</option>
+            </select>
+        </label>
+        <label>
+            Desired Interest:
+            <select
+                value={desiredInterestLevels.eating}
+                onChange={(e) => handleDesiredInterestLevelChange('eating', e.target.value)}
+            >
+                <option value="1">Not important</option>
+                <option value="2">Somewhat important</option>
+                <option value="3">Important</option>
+                <option value="4">Very important</option>
+            </select>
+        </label>
+    </div>
+)}
 
                 <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
                     <Text style={styles.submitButtonText}>Submit</Text>
@@ -218,17 +220,6 @@ const styles = {
     },
     submitButton: {
         backgroundColor: 'blue',
-        color: 'white',
-        padding: '10px',
-        borderRadius: '5px',
-        textAlign: 'center',
-        cursor: 'pointer'
-    },
-    signOutButton: {
-        position: 'absolute',
-        top: '20px',
-        right: '20px',
-        backgroundColor: 'red',
         color: 'white',
         padding: '10px',
         borderRadius: '5px',
