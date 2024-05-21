@@ -60,6 +60,9 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import HomeScreen from '../screens/HomeScreen';
 import ChatScreen from '../screens/ChatScreen';
 import ProfileScreen from '../screens/ProfileScreen';
+import { enableScreens } from 'react-native-screens';
+
+enableScreens();
 
 const Tab = createBottomTabNavigator();
 

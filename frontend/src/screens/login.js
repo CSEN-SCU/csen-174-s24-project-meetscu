@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import { View, Text, StyleSheet, Button } from 'react-native';
 import { GoogleSignin, GoogleSigninButton, statusCodes } from '@react-native-google-signin/google-signin';
+import AppNavigation from '../navigation/AppNavigation';
 
-const LoginScreen = () => {
+export default function LoginScreen(){
   const [error, setError] = useState();
   const [user, setUser] = useState();
 
@@ -13,19 +13,19 @@ const LoginScreen = () => {
       webClientId: '1079887994609-0vgil14l7fatmus2ln6hcmnq5jo1qma7.apps.googleusercontent.com',
     });
   };
+
   useEffect(() => {
     configureGoogleSignIn();
-  });
+  }, []);
 
   // google sign in
   const handleGoogle = async (e) => {
     try{
-      console.log("Google Sign In");
+      console.log("Google Sign In")
       await GoogleSignin.hasPlayServices();
-      console.log("Play Services are available")
       const user = await GoogleSignin.signIn();
       setUser(user);
-      setError();
+      setError(null);
 
       console.log(user);
     } catch(error){
@@ -37,30 +37,41 @@ const LoginScreen = () => {
   const signOut = async () => {
     try {
       setUser(undefined);
-      GoogleSignin.revokeAccess();
-      GoogleSignin.signOut();
+      await GoogleSignin.revokeAccess();
+      await GoogleSignin.signOut();
       console.log("User signed out");
     } catch (error) {
       console.error(error);
     }
   };
 
-  return (
-      <View style={styles.container}>
-        <Text>{JSON.stringify(error)}</Text>
-        {user && <Text>{JSON.stringify(user.user)}</Text>}
-        {user ? (
-          <Button title="Logout" onPress={signOut} />
-        ) : (
-          <GoogleSigninButton
-            size={GoogleSigninButton.Size.Standard}
-            color={GoogleSigninButton.Color.Dark}
-            onPress={handleGoogle}
-          />
-        )}
-      </View>
+  useEffect(() => {
+    if(user && !user.user.email.endsWith("@scu.edu")){
+      console.log("INVALID EMAIL")
+      setError("Email entered is not an SCU email. Please sign in with your SCU email.")
+      signOut();
+    }
+  }, [user]);
+
+  if(user && user.user.email.endsWith("@scu.edu")){
+      console.log("Rendering AppNavigation")
+      return <AppNavigation/>;
+  } 
+
+  console.log("Rendering LoginScreen")
+  return(
+    <View style={styles.container}>
+      <Text style={styles.titleText}>Welcome to MeetSCU!</Text>
+     <Text>Please sign in with your SCU email</Text>
+      {error && <Text style={styles.errorText}>{error}</Text>}
+      <GoogleSigninButton
+        size={GoogleSigninButton.Size.Standard}
+        color={GoogleSigninButton.Color.Dark}
+        onPress={handleGoogle}
+      />
+    </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -69,13 +80,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  text: {
-    fontSize: 16,
-    lineHeight: 21,
+  titleText: {
+    fontSize: 20,
     fontWeight: 'bold',
-    letterSpacing: 0.25,
-    color: 'white',
+    color: 'black',
   },
+  errorText: {
+    fontSize: 14,
+    color: 'red',
+    textAlign: 'center',
+  }
 });
-
-export default LoginScreen;
