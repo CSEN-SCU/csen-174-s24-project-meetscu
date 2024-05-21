@@ -49,8 +49,12 @@ export default function ProfileScreen() {
         };
 
         try {
-
-            const response = await axios.post('http://localhost:8081/submit', formData);
+            console.log("Submitting");
+            const {response} = await axios.post('http://127.0.0.1:5000/submit', formData, {
+                headers: {
+                'Content-Type': 'multipart/form-data'
+                }
+            });
 
             if (response.ok) {
                 console.log('Interests submitted successfully');

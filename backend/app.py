@@ -63,7 +63,7 @@ def index():
 
 @app.route("/submit", methods=["POST"])
 def submit_interests():
-    print("test2")
+    print("HITTING POST REQUEST SUBMIT")
     try:
         interests = request.form.getlist("interests")
         if interests:
@@ -89,4 +89,4 @@ def submit_interests():
         return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, port=5000)
