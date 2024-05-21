@@ -6,6 +6,7 @@ import AuthContext from '../utils/AuthContext';
 import axios from 'axios';
 import signOut from '../utils/signOut';
 import { useNavigation } from '@react-navigation/native';
+import AppNavigation from '../navigation/AppNavigation';
 
 export default function LoginScreen(){
   const [error, setError] = useState(null);
