@@ -1,15 +1,3 @@
-// import { View, Text } from "react-native";
-// import React from "react";
-
-
-// export default function ProfileScreen(){
-//     return (
-//         <View>
-//             <Text>ProfileScreen</Text>
-//         </View>
-//     )
-// }
-
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
@@ -209,11 +197,3 @@ const styles = StyleSheet.create({
     },
 });
 
-
-// export default function ProfileScreen(){
-//     return (
-//         <View>
-//             <Text>ProfileScreen</Text>
-//         </View>
-//     )
-// }

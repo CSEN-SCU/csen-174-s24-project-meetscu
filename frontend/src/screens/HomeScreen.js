@@ -47,3 +47,34 @@ const styles = StyleSheet.create({
         fontSize: 16,
     },
 });
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    profileImage: {
+        width: 150,
+        height: 150,
+        borderRadius: 75,
+        marginBottom: 20,
+    },
+    name: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        marginBottom: 10,
+    },
+    bio: {
+        fontSize: 16,
+        textAlign: 'center',
+        marginBottom: 10,
+    },
+    location: {
+        fontSize: 16,
+        marginBottom: 5,
+    },
+    interests: {
+        fontSize: 16,
+    },
+});
