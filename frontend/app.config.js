@@ -1,7 +1,8 @@
 export default {
   "expo": {
-    "name": "my-app",
-    "slug": "my-app",
+    "owner": "meetscu",
+    "name": "meetscu",
+    "slug": "meetscu",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -35,7 +36,7 @@ export default {
     ],
     "extra": {
       "eas": {
-        "projectId": "8334d387-5d0c-40fb-bb8d-26e6573a5cae"
+        "projectId": "adff44a2-28b2-421d-b0c6-134e52738e39"
       }
     }
   }
