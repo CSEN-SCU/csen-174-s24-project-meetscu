@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
+
 export default function ProfileScreen() {
     const [interests, setInterests] = useState({
         running: false,
@@ -42,21 +43,21 @@ export default function ProfileScreen() {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        const formData = {
-            interests: interests,
-            interestLevels: interestLevels,
-            desiredInterestLevels: desiredInterestLevels
-        };
+        const selectedInterests = Object.keys(interests).filter(interest => interests[interest]);
+        const formData = selectedInterests.map(interest => ({
+            activity: interest,
+            interest_level: interestLevels[interest],
+            desired_interest_level: desiredInterestLevels[interest]
+        }));
 
         try {
-            console.log("Submitting");
-            const {response} = await axios.post('http://127.0.0.1:5000/submit', formData, {
+            const response = await axios.post('http://127.0.0.1:5000/submit', formData, {
                 headers: {
-                'Content-Type': 'multipart/form-data'
+                    'Content-Type': 'multipart/form-data'
                 }
             });
 
-            if (response.ok) {
+            if (response.status === 200) {
                 console.log('Interests submitted successfully');
                 // Handle success
             } else {
@@ -111,79 +112,77 @@ export default function ProfileScreen() {
                         </div>
                     )}
                     <label style={styles.checkboxContainer}>
-    <input
-        type="checkbox"
-        checked={interests.gym}
-        onChange={() => handleCheckboxChange('gym')}
-    />
-    Gym
-</label>
-{interests.gym && (
-    <div style={styles.dropdown}>
-        <label>
-            Interest Level:
-            <select
-                value={interestLevels.gym}
-                onChange={(e) => handleInterestLevelChange('gym', e.target.value)}
-            >
-                <option value="1">Not interested</option>
-                <option value="2">Somewhat interested</option>
-                <option value="3">Interested</option>
-                <option value="4">Very interested</option>
-            </select>
-        </label>
-        <label>
-            Desired Interest:
-            <select
-                value={desiredInterestLevels.gym}
-                onChange={(e) => handleDesiredInterestLevelChange('gym', e.target.value)}
-            >
-                <option value="1">Not important</option>
-                <option value="2">Somewhat important</option>
-                <option value="3">Important</option>
-                <option value="4">Very important</option>
-            </select>
-        </label>
-    </div>
-)}
-
-<label style={styles.checkboxContainer}>
-    <input
-        type="checkbox"
-        checked={interests.eating}
-        onChange={() => handleCheckboxChange('eating')}
-    />
-    Eating
-</label>
-{interests.eating && (
-    <div style={styles.dropdown}>
-        <label>
-            Interest Level:
-            <select
-                value={interestLevels.eating}
-                onChange={(e) => handleInterestLevelChange('eating', e.target.value)}
-            >
-                <option value="1">Not interested</option>
-                <option value="2">Somewhat interested</option>
-                <option value="3">Interested</option>
-                <option value="4">Very interested</option>
-            </select>
-        </label>
-        <label>
-            Desired Interest:
-            <select
-                value={desiredInterestLevels.eating}
-                onChange={(e) => handleDesiredInterestLevelChange('eating', e.target.value)}
-            >
-                <option value="1">Not important</option>
-                <option value="2">Somewhat important</option>
-                <option value="3">Important</option>
-                <option value="4">Very important</option>
-            </select>
-        </label>
-    </div>
-)}
-
+                        <input
+                            type="checkbox"
+                            checked={interests.gym}
+                            onChange={() => handleCheckboxChange('gym')}
+                        />
+                        Gym
+                    </label>
+                    {interests.gym && (
+                        <div style={styles.dropdown}>
+                            <label>
+                                Interest Level:
+                                <select
+                                    value={interestLevels.gym}
+                                    onChange={(e) => handleInterestLevelChange('gym', e.target.value)}
+                                >
+                                    <option value="1">Not interested</option>
+                                    <option value="2">Somewhat interested</option>
+                                    <option value="3">Interested</option>
+                                    <option value="4">Very interested</option>
+                                </select>
+                            </label>
+                            <label>
+                                Desired Interest:
+                                <select
+                                    value={desiredInterestLevels.gym}
+                                    onChange={(e) => handleDesiredInterestLevelChange('gym', e.target.value)}
+                                >
+                                    <option value="1">Not important</option>
+                                    <option value="2">Somewhat important</option>
+                                    <option value="3">Important</option>
+                                    <option value="4">Very important</option>
+                                </select>
+                            </label>
+                        </div>
+                    )}
+                    <label style={styles.checkboxContainer}>
+                        <input
+                            type="checkbox"
+                            checked={interests.eating}
+                            onChange={() => handleCheckboxChange('eating')}
+                        />
+                        Eating
+                    </label>
+                    {interests.eating && (
+                        <div style={styles.dropdown}>
+                            <label>
+                                Interest Level:
+                                <select
+                                    value={interestLevels.eating}
+                                    onChange={(e) => handleInterestLevelChange('eating', e.target.value)}
+                                >
+                                    <option value="1">Not interested</option>
+                                    <option value="2">Somewhat interested</option>
+                                    <option value="3">Interested</option>
+                                    <option value="4">Very interested</option>
+                                </select>
+                            </label>
+                            <label>
+                                Desired Interest:
+                                <select
+                                    value={desiredInterestLevels.eating}
+                                    onChange={(e) => handleDesiredInterestLevelChange('eating', e.target.value)}
+                                >
+                                    <option value="1">Not important</option>
+                                    <option value="2">Somewhat important</option>
+                                    <option value="3">Important</option>
+                                    <option value="4">Very important</option>
+                                </select>
+                            </label>
+                        </div>
+                    )}
                 </div>
                 <button style={styles.submitButton} type="submit">
                     Submit
