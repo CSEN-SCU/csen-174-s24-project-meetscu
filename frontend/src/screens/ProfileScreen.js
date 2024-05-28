@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import UserContext from "../navigation/UserContext";
 
 
 export default function ProfileScreen() {
@@ -18,6 +19,7 @@ export default function ProfileScreen() {
         gym: '',
         eating: ''
     });
+    const { user, setUser } = React.useContext(UserContext);
 
     const handleCheckboxChange = (interest) => {
         setInterests({
@@ -226,12 +228,3 @@ const styles = {
         cursor: 'pointer'
     }
 };
-
-
-export default function ProfileScreen(){
-    return (
-        <View>
-            <Text>ProfileScreen</Text>
-        </View>
-    )
-}

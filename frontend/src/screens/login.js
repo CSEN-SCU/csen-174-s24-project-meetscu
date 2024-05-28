@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Button } from 'react-native';
 import { GoogleSignin, GoogleSigninButton, statusCodes } from '@react-native-google-signin/google-signin';
+import UserContext from '../navigation/UserContext';
 import AppNavigation from '../navigation/AppNavigation';
+import axios from 'axios';
 
 export default function LoginScreen(){
   const [error, setError] = useState();
-  const [user, setUser] = useState();
+  const [authenticated, setAuthenticated] = useState(false);
+  const { user, setUser } = React.useContext(UserContext);
 
   // configure google sign in
   const configureGoogleSignIn = () => {
@@ -24,10 +27,8 @@ export default function LoginScreen(){
       console.log("Google Sign In")
       await GoogleSignin.hasPlayServices();
       const user = await GoogleSignin.signIn();
-      setUser(user);
+      setUser(user.user);
       setError(null);
-
-      console.log(user);
     } catch(error){
       console.log(error);
     }
@@ -45,18 +46,44 @@ export default function LoginScreen(){
     }
   };
 
+  const sendUser = async (user) => {
+    try{
+      const sendUserDataResponse = await axios.post(
+        "http://127.0.0.1:5000/loggedIn",
+        {
+          email: user.email,
+          name: user.name,
+          photo: user.photo
+        }
+      );
+      if(sendUserDataResponse.status === 200){
+        console.log("User data sent to backend");
+        setAuthenticated(true);
+      } else {
+        console.error("Failed to send user data to backend");
+      }
+    } catch(error){
+      console.log(error);
+    }
+  }
+
   useEffect(() => {
-    if(user && !user.user.email.endsWith("@scu.edu")){
+    if(user && !user.email.endsWith("@scu.edu")){
       console.log("INVALID EMAIL")
       setError("Email entered is not an SCU email. Please sign in with your SCU email.")
       signOut();
     }
   }, [user]);
 
-  if(user && user.user.email.endsWith("@scu.edu")){
-      console.log("Rendering AppNavigation")
-      return <AppNavigation/>;
-  } 
+  useEffect(() => {
+    if(user && user.email.endsWith("@scu.edu")){
+      sendUser(user);
+    }
+  }, [user]);
+
+  if(authenticated){
+    return <AppNavigation/>;
+  }
 
   console.log("Rendering LoginScreen")
   return(
