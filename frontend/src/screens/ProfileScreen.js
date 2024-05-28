@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import axios from 'axios';
+import UserContext from "../navigation/UserContext";
 import UserContext from "../utils/UserContext";
 import AuthContext from '../utils/AuthContext';
 import signOut from '../utils/signOut';
