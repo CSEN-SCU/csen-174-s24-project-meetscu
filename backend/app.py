@@ -1,5 +1,7 @@
 from flask import Flask, request, jsonify, render_template, redirect, url_for
 from pymongo import MongoClient, ReturnDocument
+from bson import json_util
+import json
 
 # Setup connection to MongoDB
 app = Flask(__name__)
@@ -10,6 +12,9 @@ counter_collection = db["counters"]
 
 if counter_collection.count_documents({"_id": "user_id"}) == 0:
     counter_collection.insert_one({"_id": "user_id", "seq": 0})
+    
+def parse_json(data):
+    return json.loads(json_util.dumps(data))
 
 def get_next_user_id():
     counter = counter_collection.find_one_and_update(
@@ -125,6 +130,34 @@ def submit_interests():
 
         return redirect(url_for("index"))
 
+    except Exception as e:
+        print(f"Exception occurred: {e}")
+        return jsonify({"error": str(e)}), 500
+
+# after logging in, store user in database
+@app.route("/loggedIn", methods=["POST"])
+def loggedIn():
+    try:
+        userData = request.get_json()
+        print("Request data", userData)
+        users_collection.insert_one(userData)
+        return '', 200
+    except Exception as e:
+        print(f"Exception occurred: {e}")
+        return jsonify({"error": str(e)}), 500
+
+# get user data
+@app.route("/getUser", methods=["GET"])
+def getUser():
+    try:
+        email = request.args.get('email')        
+        user = users_collection.find_one({
+            "email": email
+        })
+        if user is None:
+            return jsonify({"error": "User not found"}), 404
+        print("USER DATA", user)
+        return parse_json(user), 200
     except Exception as e:
         print(f"Exception occurred: {e}")
         return jsonify({"error": str(e)}), 500
