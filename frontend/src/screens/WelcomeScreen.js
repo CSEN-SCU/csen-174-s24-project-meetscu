@@ -4,7 +4,7 @@ import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import HomeScreen from '../screens/HomeScreen';
+import MeetScreen from '../screens/MeetScreen';
 import ChatScreen from '../screens/ChatScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 
@@ -42,8 +42,8 @@ export default function WelcomeScreen(){
             <View style={styles.tabContainer}>
                 <Tab.Navigator tabBarOptions={{ style: styles.tabBar }}>
                     <Tab.Screen 
-                        name="Home" 
-                        component={HomeScreen} 
+                        name="Meet" 
+                        component={MeetScreen} 
                         options={{
                             tabBarIcon: ({ focused }) => (
                                 <Image
