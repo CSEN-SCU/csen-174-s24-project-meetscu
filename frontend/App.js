@@ -1,11 +1,14 @@
 import React from "react";
-import LoginScreen from './src/screens/login';
-import { UserProvider } from './src/navigation/UserContext';
+import AppNavigation from './src/navigation/AppNavigation';
+import { UserProvider } from './src/utils/UserContext';
+import { AuthProvider } from "./src/utils/AuthContext";
 
 export default function App(){
   return(
     <UserProvider>
-      <LoginScreen/>
+      <AuthProvider>
+        <AppNavigation/>
+      </AuthProvider>
     </UserProvider>
   );
 }

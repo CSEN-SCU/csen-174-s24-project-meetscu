@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify, render_template, redirect, url_for
 from pymongo import MongoClient, ReturnDocument
-from bson import json_util
+from bson import json_util, ObjectId
 import json
 
 # Setup connection to MongoDB
@@ -31,7 +31,7 @@ def calculate_compatibility(user1, user2):
 
     activities1 = {act["activity"]: act for act in user1["activities"]}
     activities2 = {act["activity"]: act for act in user2["activities"]}
-
+    
     for activity in activities1:
         if activity in activities2:
             interest_user1 = activities1[activity]["interest_level"]
@@ -59,15 +59,12 @@ def calculate_compatibility(user1, user2):
 
 def update_compatibility_scores(new_user):
     existing_users = list(users_collection.find())
-
     # Calculate compatibility scores for the new user with all existing users
     new_user_scores = []
     for user in existing_users:
         score = calculate_compatibility(new_user, user)
         new_user_scores.append({"user_id": user["user_id"], "score": score})
-
     new_user_scores = sorted(new_user_scores, key=lambda x: x["score"], reverse=True)
-
     new_user["compatibility_scores"] = new_user_scores
     new_user_id = users_collection.insert_one(new_user).inserted_id
 
@@ -77,7 +74,7 @@ def update_compatibility_scores(new_user):
             {"_id": user["_id"]},
             {"$push": {"compatibility_scores": {"user_id": new_user["user_id"], "score": score}}}
         )
-
+    
     for user in existing_users:
         updated_user = users_collection.find_one({"_id": user["_id"]})
         sorted_scores = sorted(updated_user["compatibility_scores"], key=lambda x: x["score"], reverse=True)
@@ -85,7 +82,7 @@ def update_compatibility_scores(new_user):
             {"_id": user["_id"]},
             {"$set": {"compatibility_scores": sorted_scores}}
         )
-
+    
 @app.route("/")
 def index():
     users = list(users_collection.find())
@@ -94,7 +91,7 @@ def index():
 @app.route("/submit", methods=["POST"])
 def submit_interests():
     try:
-        print(f"Request form data: {request.form}")
+        print(f"Request form data: {request.form.to_dict()}")
 
         activities_data = []
 
@@ -124,6 +121,8 @@ def submit_interests():
             "activities": activities_data,
             "compatibility_scores": []
         }
+        
+        print("New user data:", new_user_data)
 
         # Update compatibility scores and store the new user data
         update_compatibility_scores(new_user_data)
@@ -139,9 +138,10 @@ def submit_interests():
 def loggedIn():
     try:
         userData = request.get_json()
-        print("Request data", userData)
-        users_collection.insert_one(userData)
-        return '', 200
+        print("Logging in", userData)
+        id = users_collection.insert_one(userData).inserted_id
+        userData['_id'] = str(id)
+        return parse_json(userData), 200
     except Exception as e:
         print(f"Exception occurred: {e}")
         return jsonify({"error": str(e)}), 500
@@ -150,17 +150,34 @@ def loggedIn():
 @app.route("/getUser", methods=["GET"])
 def getUser():
     try:
-        email = request.args.get('email')        
+        userData = request.args.to_dict()
         user = users_collection.find_one({
-            "email": email
+            "email": userData["email"]
         })
         if user is None:
-            return jsonify({"error": "User not found"}), 404
-        print("USER DATA", user)
+            return 'User not found', 204
         return parse_json(user), 200
     except Exception as e:
         print(f"Exception occurred: {e}")
         return jsonify({"error": str(e)}), 500
+
+# delete user from database
+@app.route("/deleteUser", methods=["DELETE"])
+def deleteUser():
+    try:
+        objectIdStr = request.args.get('_id')
+        objectId = ObjectId(objectIdStr)
+        result = users_collection.delete_one({
+            "_id": objectId
+        })
+        if result.deleted_count == 1:
+            return 'User deleted successfully', 200
+        else:
+            return 'User not found', 404
+    except Exception as e:
+        print(f"Exception occurred: {e}")
+        return jsonify({"error": str(e)}), 500
+        
 
 if __name__ == "__main__":
     app.run(debug=True)

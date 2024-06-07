@@ -1,30 +1,15 @@
 import { View, Text, StyleSheet, Image } from "react-native";
 import React, { useState, useEffect } from "react";
-import UserContext from "../navigation/UserContext";
+import UserContext from "../utils/UserContext";
+import AuthContext from "../utils/AuthContext";
 import axios from "axios";
 
 export default function HomeScreen(){
     const { user, setUser } = React.useContext(UserContext);
-
-    console.log("USER: ", user)
-    
-    useEffect(() => {
-        axios.get("http://127.0.0.1:5000/getUser", {
-            params: {
-                email: user.email
-            }
-        })
-        .then((response) => {
-            console.log("GETTING USER RESPONSE: ", response.data);
-            setUser(response.data);
-        })
-        .catch((error) => {
-            console.log(error);
-        });
-    }, [user.email]);
+    const { isLoggedIn, setIsLoggedIn } = React.useContext(AuthContext);
 
     // if user has not filled in profile
-    if(!user || !user.interests){
+    if(!user || !user.activities){
         return (
             <View style={styles.container}>
                 <Text>Please fill out your profile first</Text>
