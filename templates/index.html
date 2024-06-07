@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interest Form</title>
+    <link rel="stylesheet" type="text/css" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Interest Form</h1>
+        <form action="/submit" method="post" id="interestForm">
+            <label><input type="checkbox" name="interests" value="running"> Running</label>
+            <select name="running_interest" class="interestLevel" style="display: none;">
+                <option value="1">Not interested</option>
+                <option value="2">Somewhat interested</option>
+                <option value="3">Interested</option>
+                <option value="4">Very interested</option>
+            </select>
+            <select name="running_desired_interest" class="desiredInterest" style="display: none;">
+                <option value="1">Not important</option>
+                <option value="2">Somewhat important</option>
+                <option value="3">Important</option>
+                <option value="4">Very important</option>
+            </select>
+            <br>
+            <label><input type="checkbox" name="interests" value="gym"> Gym</label>
+            <select name="gym_interest" class="interestLevel" style="display: none;">
+                <option value="1">Not interested</option>
+                <option value="2">Somewhat interested</option>
+                <option value="3">Interested</option>
+                <option value="4">Very interested</option>
+            </select>
+            <select name="gym_desired_interest" class="desiredInterest" style="display: none;">
+                <option value="1">Not important</option>
+                <option value="2">Somewhat important</option>
+                <option value="3">Important</option>
+                <option value="4">Very important</option>
+            </select>
+            <br>
+            <label><input type="checkbox" name="interests" value="eating"> Eating</label>
+            <select name="eating_interest" class="interestLevel" style="display: none;">
+                <option value="1">Not interested</option>
+                <option value="2">Somewhat interested</option>
+                <option value="3">Interested</option>
+                <option value="4">Very interested</option>
+            </select>
+            <select name="eating_desired_interest" class="desiredInterest" style="display: none;">
+                <option value="1">Not important</option>
+                <option value="2">Somewhat important</option>
+                <option value="3">Important</option>
+                <option value="4">Very important</option>
+            </select>
+            <br>
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+
+    <script>
+        const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+        checkboxes.forEach((checkbox) => {
+            checkbox.addEventListener('change', function() {
+                const interestLevelDropdown = this.parentNode.nextElementSibling;
+                const desiredInterestDropdown = this.parentNode.nextElementSibling.nextElementSibling;
+                if (this.checked) {
+                    interestLevelDropdown.style.display = 'block';
+                    desiredInterestDropdown.style.display = 'block';
+                } else {
+                    interestLevelDropdown.style.display = 'none';
+                    desiredInterestDropdown.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

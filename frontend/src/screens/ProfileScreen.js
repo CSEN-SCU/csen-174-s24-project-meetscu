@@ -1,6 +1,11 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
+import axios from 'axios';
+import UserContext from "../utils/UserContext";
+import AuthContext from '../utils/AuthContext';
+import signOut from '../utils/signOut';
+import { useNavigation } from '@react-navigation/native';
 
 export default function ProfileScreen() {
     const [interests, setInterests] = useState({
@@ -18,6 +23,7 @@ export default function ProfileScreen() {
         gym: '',
         eating: ''
     });
+    const userSignOut = signOut();
 
     const handleCheckboxChange = (interest) => {
         setInterests({
@@ -40,8 +46,40 @@ export default function ProfileScreen() {
         });
     };
 
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        const selectedInterests = Object.keys(interests).filter(interest => interests[interest]);
+        const formData = selectedInterests.map(interest => ({
+            activity: interest,
+            interest_level: interestLevels[interest],
+            desired_interest_level: desiredInterestLevels[interest]
+        }));
+        try {
+            const response = await axios.post('http://127.0.0.1:5000/submit', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+
+            if (response.status === 200) {
+                console.log('Interests submitted successfully');
+                // Handle success
+            } else {
+                console.error('Failed to submit interests');
+                // Handle error
+            }
+        } catch (error) {
+            console.error('Error occurred:', error);
+            // Handle error
+        }
+    };
+
     return (
         <View style={styles.container}>
+            <TouchableOpacity style={styles.signOutButton} onPress={userSignOut}>
+                <Text style={styles.signOutText}>Sign Out</Text>
+            </TouchableOpacity>
+
             <Text style={styles.title}>Interest Form</Text>
             <View style={styles.form}>
                 <TouchableOpacity
@@ -143,7 +181,7 @@ export default function ProfileScreen() {
                     </View>
                 )}
 
-                <TouchableOpacity style={styles.submitButton}>
+                <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
                     <Text style={styles.submitButtonText}>Submit</Text>
                 </TouchableOpacity>
             </View>
@@ -151,49 +189,50 @@ export default function ProfileScreen() {
     );
 }
 
-const styles = StyleSheet.create({
+const styles = {
     container: {
-        flex: 1,
+        display: 'flex',
         alignItems: 'center',
-        justifyContent: 'center',
+        // justifyContent: 'center',
+        padding: '20px',
+        paddingTop: 50,
+        marginTop: 10
     },
     title: {
-        fontSize: 24,
+        fontSize: '24px',
         fontWeight: 'bold',
-        marginBottom: 20,
+        marginBottom: '20px'
     },
     form: {
-        width: '80%',
+        width: '80%'
     },
     checkboxContainer: {
+        display: 'flex',
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: 10,
-    },
-    checkboxLabel: {
-        marginRight: 10,
+        marginBottom: '10px'
     },
     dropdown: {
-        marginLeft: 20,
-        marginBottom: 10,
-    },
-    select: {
-        width: '100%',
-        marginBottom: 5,
-        padding: 8,
-        borderColor: '#ccc',
-        borderWidth: 1,
-        borderRadius: 5,
+        marginLeft: '20px',
+        marginBottom: '10px'
     },
     submitButton: {
         backgroundColor: 'blue',
-        padding: 10,
-        borderRadius: 5,
-        alignItems: 'center',
-    },
-    submitButtonText: {
         color: 'white',
-        fontSize: 16,
+        padding: '10px',
+        borderRadius: '5px',
+        textAlign: 'center',
+        cursor: 'pointer'
     },
-});
-
+    signOutButton: {
+        position: 'absolute',
+        top: '20px',
+        right: '20px',
+        backgroundColor: 'red',
+        color: 'white',
+        padding: '10px',
+        borderRadius: '5px',
+        textAlign: 'center',
+        cursor: 'pointer'
+    },
+};

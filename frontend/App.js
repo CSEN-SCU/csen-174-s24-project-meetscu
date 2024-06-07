@@ -1,9 +1,14 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
 import React from "react";
 import AppNavigation from './src/navigation/AppNavigation';
-import LoginScreen from './src/screens/login';
+import { UserProvider } from './src/utils/UserContext';
+import { AuthProvider } from "./src/utils/AuthContext";
 
 export default function App(){
-  return <LoginScreen/>;
+  return(
+    <UserProvider>
+      <AuthProvider>
+        <AppNavigation/>
+      </AuthProvider>
+    </UserProvider>
+  );
 }
