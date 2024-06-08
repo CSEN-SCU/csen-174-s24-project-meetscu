@@ -1,6 +1,11 @@
 from flask import Flask, request, jsonify, render_template, redirect, url_for
 from pymongo import MongoClient, ReturnDocument
+<<<<<<< HEAD
 from bson import json_util, ObjectId
+=======
+from bson import json_util
+from bson import ObjectId
+>>>>>>> cb48d1b90ca4607a123084ff77b1a01fca6b2eb6
 import json
 
 # Setup connection to MongoDB
@@ -31,7 +36,11 @@ def calculate_compatibility(user1, user2):
 
     activities1 = {act["activity"]: act for act in user1["activities"]}
     activities2 = {act["activity"]: act for act in user2["activities"]}
+<<<<<<< HEAD
     
+=======
+
+>>>>>>> cb48d1b90ca4607a123084ff77b1a01fca6b2eb6
     for activity in activities1:
         if activity in activities2:
             interest_user1 = activities1[activity]["interest_level"]
@@ -59,12 +68,22 @@ def calculate_compatibility(user1, user2):
 
 def update_compatibility_scores(new_user):
     existing_users = list(users_collection.find())
+<<<<<<< HEAD
+=======
+
+>>>>>>> cb48d1b90ca4607a123084ff77b1a01fca6b2eb6
     # Calculate compatibility scores for the new user with all existing users
     new_user_scores = []
     for user in existing_users:
         score = calculate_compatibility(new_user, user)
         new_user_scores.append({"user_id": user["user_id"], "score": score})
+<<<<<<< HEAD
     new_user_scores = sorted(new_user_scores, key=lambda x: x["score"], reverse=True)
+=======
+
+    new_user_scores = sorted(new_user_scores, key=lambda x: x["score"], reverse=True)
+
+>>>>>>> cb48d1b90ca4607a123084ff77b1a01fca6b2eb6
     new_user["compatibility_scores"] = new_user_scores
     new_user_id = users_collection.insert_one(new_user).inserted_id
 
@@ -74,7 +93,11 @@ def update_compatibility_scores(new_user):
             {"_id": user["_id"]},
             {"$push": {"compatibility_scores": {"user_id": new_user["user_id"], "score": score}}}
         )
+<<<<<<< HEAD
     
+=======
+
+>>>>>>> cb48d1b90ca4607a123084ff77b1a01fca6b2eb6
     for user in existing_users:
         updated_user = users_collection.find_one({"_id": user["_id"]})
         sorted_scores = sorted(updated_user["compatibility_scores"], key=lambda x: x["score"], reverse=True)
@@ -82,7 +105,11 @@ def update_compatibility_scores(new_user):
             {"_id": user["_id"]},
             {"$set": {"compatibility_scores": sorted_scores}}
         )
+<<<<<<< HEAD
     
+=======
+
+>>>>>>> cb48d1b90ca4607a123084ff77b1a01fca6b2eb6
 @app.route("/")
 def index():
     users = list(users_collection.find())
@@ -91,7 +118,11 @@ def index():
 @app.route("/submit", methods=["POST"])
 def submit_interests():
     try:
+<<<<<<< HEAD
         print(f"Request form data: {request.form.to_dict()}")
+=======
+        print(f"Request form data: {request.form}")
+>>>>>>> cb48d1b90ca4607a123084ff77b1a01fca6b2eb6
 
         activities_data = []
 
@@ -121,8 +152,11 @@ def submit_interests():
             "activities": activities_data,
             "compatibility_scores": []
         }
+<<<<<<< HEAD
         
         print("New user data:", new_user_data)
+=======
+>>>>>>> cb48d1b90ca4607a123084ff77b1a01fca6b2eb6
 
         # Update compatibility scores and store the new user data
         update_compatibility_scores(new_user_data)
@@ -140,15 +174,24 @@ def loggedIn():
         userData = request.get_json()
         userData["likes"] = []
         userData["matches"] = []
+<<<<<<< HEAD
         print("Logging in", userData)
+=======
+        print("Request data", userData)
+>>>>>>> cb48d1b90ca4607a123084ff77b1a01fca6b2eb6
         # Check if the user already exists
         existing_user = users_collection.find_one({"email": userData["email"]})
         if existing_user:
             print("User already exists in the database")
             return '', 200
+<<<<<<< HEAD
         id = users_collection.insert_one(userData).inserted_id
         userData['_id'] = str(id)
         return parse_json(userData), 200
+=======
+        users_collection.insert_one(userData)
+        return '', 200
+>>>>>>> cb48d1b90ca4607a123084ff77b1a01fca6b2eb6
     except Exception as e:
         print(f"Exception occurred: {e}")
         return jsonify({"error": str(e)}), 500
@@ -157,12 +200,21 @@ def loggedIn():
 @app.route("/getUser", methods=["GET"])
 def getUser():
     try:
+<<<<<<< HEAD
         userData = request.args.to_dict()
+=======
+        email = request.args.get('email')        
+>>>>>>> cb48d1b90ca4607a123084ff77b1a01fca6b2eb6
         user = users_collection.find_one({
             "email": email
         }, {"user_id": 1, "email": 1, "name": 1, "photo": 1, "likes": 1, "matches": 1})  # Include user_id explicitly
         if user is None:
+<<<<<<< HEAD
             return 'User not found', 204
+=======
+            return jsonify({"error": "User not found"}), 404
+        print("USER DATA", user)
+>>>>>>> cb48d1b90ca4607a123084ff77b1a01fca6b2eb6
         return parse_json(user), 200
     except Exception as e:
         print(f"Exception occurred: {e}")

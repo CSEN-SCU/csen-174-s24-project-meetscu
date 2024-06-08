@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
@@ -7,6 +8,12 @@ import UserContext from "../utils/UserContext";
 import AuthContext from '../utils/AuthContext';
 import signOut from '../utils/signOut';
 import { useNavigation } from '@react-navigation/native';
+=======
+import React, { useState } from 'react';
+import axios from 'axios';
+import UserContext from "../navigation/UserContext";
+
+>>>>>>> cb48d1b90ca4607a123084ff77b1a01fca6b2eb6
 
 export default function ProfileScreen() {
     const [interests, setInterests] = useState({
@@ -24,7 +31,11 @@ export default function ProfileScreen() {
         gym: '',
         eating: ''
     });
+<<<<<<< HEAD
     const userSignOut = signOut();
+=======
+    const { user, setUser } = React.useContext(UserContext);
+>>>>>>> cb48d1b90ca4607a123084ff77b1a01fca6b2eb6
 
     const handleCheckboxChange = (interest) => {
         setInterests({
@@ -49,12 +60,20 @@ export default function ProfileScreen() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+<<<<<<< HEAD
+=======
+
+>>>>>>> cb48d1b90ca4607a123084ff77b1a01fca6b2eb6
         const selectedInterests = Object.keys(interests).filter(interest => interests[interest]);
         const formData = selectedInterests.map(interest => ({
             activity: interest,
             interest_level: interestLevels[interest],
             desired_interest_level: desiredInterestLevels[interest]
         }));
+<<<<<<< HEAD
+=======
+
+>>>>>>> cb48d1b90ca4607a123084ff77b1a01fca6b2eb6
         try {
             const response = await axios.post('http://127.0.0.1:5000/submit', formData, {
                 headers: {
@@ -76,6 +95,7 @@ export default function ProfileScreen() {
     };
 
     return (
+<<<<<<< HEAD
         <View style={styles.container}>
             <TouchableOpacity style={styles.signOutButton} onPress={userSignOut}>
                 <Text style={styles.signOutText}>Sign Out</Text>
@@ -189,6 +209,126 @@ export default function ProfileScreen() {
                 </TouchableOpacity>
             </View>
         </View>
+=======
+        <div>
+            <h1>Interest Form</h1>
+            <form onSubmit={handleSubmit}>
+                <div style={styles.form}>
+                    <label style={styles.checkboxContainer}>
+                        <input
+                            type="checkbox"
+                            checked={interests.running}
+                            onChange={() => handleCheckboxChange('running')}
+                        />
+                        Running
+                    </label>
+                    {interests.running && (
+                        <div style={styles.dropdown}>
+                            <label>
+                                Interest Level:
+                                <select
+                                    value={interestLevels.running}
+                                    onChange={(e) => handleInterestLevelChange('running', e.target.value)}
+                                >
+                                    <option value="1">Not interested</option>
+                                    <option value="2">Somewhat interested</option>
+                                    <option value="3">Interested</option>
+                                    <option value="4">Very interested</option>
+                                </select>
+                            </label>
+                            <label>
+                                Desired Interest:
+                                <select
+                                    value={desiredInterestLevels.running}
+                                    onChange={(e) => handleDesiredInterestLevelChange('running', e.target.value)}
+                                >
+                                    <option value="1">Not important</option>
+                                    <option value="2">Somewhat important</option>
+                                    <option value="3">Important</option>
+                                    <option value="4">Very important</option>
+                                </select>
+                            </label>
+                        </div>
+                    )}
+                    <label style={styles.checkboxContainer}>
+                        <input
+                            type="checkbox"
+                            checked={interests.gym}
+                            onChange={() => handleCheckboxChange('gym')}
+                        />
+                        Gym
+                    </label>
+                    {interests.gym && (
+                        <div style={styles.dropdown}>
+                            <label>
+                                Interest Level:
+                                <select
+                                    value={interestLevels.gym}
+                                    onChange={(e) => handleInterestLevelChange('gym', e.target.value)}
+                                >
+                                    <option value="1">Not interested</option>
+                                    <option value="2">Somewhat interested</option>
+                                    <option value="3">Interested</option>
+                                    <option value="4">Very interested</option>
+                                </select>
+                            </label>
+                            <label>
+                                Desired Interest:
+                                <select
+                                    value={desiredInterestLevels.gym}
+                                    onChange={(e) => handleDesiredInterestLevelChange('gym', e.target.value)}
+                                >
+                                    <option value="1">Not important</option>
+                                    <option value="2">Somewhat important</option>
+                                    <option value="3">Important</option>
+                                    <option value="4">Very important</option>
+                                </select>
+                            </label>
+                        </div>
+                    )}
+                    <label style={styles.checkboxContainer}>
+                        <input
+                            type="checkbox"
+                            checked={interests.eating}
+                            onChange={() => handleCheckboxChange('eating')}
+                        />
+                        Eating
+                    </label>
+                    {interests.eating && (
+                        <div style={styles.dropdown}>
+                            <label>
+                                Interest Level:
+                                <select
+                                    value={interestLevels.eating}
+                                    onChange={(e) => handleInterestLevelChange('eating', e.target.value)}
+                                >
+                                    <option value="1">Not interested</option>
+                                    <option value="2">Somewhat interested</option>
+                                    <option value="3">Interested</option>
+                                    <option value="4">Very interested</option>
+                                </select>
+                            </label>
+                            <label>
+                                Desired Interest:
+                                <select
+                                    value={desiredInterestLevels.eating}
+                                    onChange={(e) => handleDesiredInterestLevelChange('eating', e.target.value)}
+                                >
+                                    <option value="1">Not important</option>
+                                    <option value="2">Somewhat important</option>
+                                    <option value="3">Important</option>
+                                    <option value="4">Very important</option>
+                                </select>
+                            </label>
+                        </div>
+                    )}
+                </div>
+                <button style={styles.submitButton} type="submit">
+                    Submit
+                </button>
+            </form>
+        </div>
+>>>>>>> cb48d1b90ca4607a123084ff77b1a01fca6b2eb6
     );
 }
 
@@ -196,10 +336,15 @@ const styles = {
     container: {
         display: 'flex',
         alignItems: 'center',
+<<<<<<< HEAD
         // justifyContent: 'center',
         padding: '20px',
         paddingTop: 50,
         marginTop: 10
+=======
+        justifyContent: 'center',
+        padding: '20px'
+>>>>>>> cb48d1b90ca4607a123084ff77b1a01fca6b2eb6
     },
     title: {
         fontSize: '24px',
@@ -226,5 +371,10 @@ const styles = {
         borderRadius: '5px',
         textAlign: 'center',
         cursor: 'pointer'
+<<<<<<< HEAD
     },
 };
+=======
+    }
+};
+>>>>>>> cb48d1b90ca4607a123084ff77b1a01fca6b2eb6
