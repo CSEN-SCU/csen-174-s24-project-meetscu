@@ -1,8 +1,10 @@
 import { View, Text, StyleSheet, Image, Button, Modal, TouchableOpacity } from "react-native";
 import React, { useState, useEffect, useRef, useContext } from "react";
-import UserContext from "../navigation/UserContext";
+import UserContext from "../utils/UserContext";
+import AuthContext from "../utils/AuthContext";
 import axios from "axios";
 import TinderCard from "./TinderCard"; // Assuming you have a TinderCard component
+import { useNavigation } from '@react-navigation/native';
 
 const Card = ({ user, bestMatch }) => (
   <View style={styles.card}>
@@ -39,9 +41,11 @@ export default function MeetScreen() {
   }, [user.email]);
 
   const getBestMatch = (otherUserEmail) => {
+    if (!user || !user.compatibility_scores) return null;
     const compatibilityScore = user.compatibility_scores.find(score => score.email === otherUserEmail);
     return compatibilityScore ? compatibilityScore.best_match : null;
-  };
+};
+
 
   const handleCardLeftScreen = (direction) => {
     if (currentIndex >= cards.length) {
@@ -92,6 +96,17 @@ export default function MeetScreen() {
       });
   };
 
+  const handleDelete = async () => {
+    try {
+      const email = user.email;  // Replace with actual user email from session or state
+      const response = await axios.post('http://127.0.0.1:5000/delete', { email });
+      if (response.status === 200) {
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
   return (
     <View style={styles.container}>
       <Modal
@@ -102,12 +117,20 @@ export default function MeetScreen() {
       >
         <View style={styles.popupContainer}>
           <View style={styles.popup}>
-            <Text style={styles.popupText}>You have at least 2 matches! If you have connected with a match, we encourage that you delete the app :{')'}</Text>
+            <Text style={styles.popupText}>
+              You have at least 2 matches! If you have connected with a match, we encourage that you delete the app :)
+            </Text>
             <TouchableOpacity
               style={styles.popupButton}
               onPress={() => setShowPopup(false)}
             >
               <Text style={styles.popupButtonText}>Close</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.popupButton, styles.deleteButton]}
+              onPress={handleDelete}
+            >
+              <Text style={styles.popupButtonText}>Delete</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -201,5 +224,8 @@ const styles = StyleSheet.create({
   popupButtonText: {
     color: "white",
     fontSize: 16,
+  },
+  deleteButton: {
+    backgroundColor: 'red',
   },
 });
