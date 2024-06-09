@@ -17,7 +17,7 @@ export default function MeetScreen() {
   const [cards, setCards] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const currentCardRef = useRef(null);
-
+  console.log("Test");
   useEffect(() => {
     // Fetch user data from backend
     axios.get("http://127.0.0.1:5000/getUser", {
@@ -31,18 +31,25 @@ export default function MeetScreen() {
       console.log(error);
     });
 
-    // Fetch other users for swiping
     axios.get("http://127.0.0.1:5000/getUsers", {
       params: { email: user.email }
     })
       .then(response => {
-        console.log('Received users:', response.data);
-        setCards(response.data);
+        console.log('Received users:');
+        response.data.users.forEach(user => {
+          console.log(`User: ${user.email}`);
+          console.log('Likes:');
+          user.likes.forEach(like => {
+            console.log(`- ${like.email}`);
+          });
+        });
+        setCards(response.data.users);
       })
       .catch(error => {
         console.log('Error fetching users:', error);
       });
-  }, [user.email]);
+    
+  }, [user.email], [user.likes]);
 
   const handleCardLeftScreen = (direction) => {
     console.log(`Card left the screen ${direction}`);

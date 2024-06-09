@@ -9,9 +9,6 @@ import { enableScreens } from 'react-native-screens';
 import AuthContext from "../utils/AuthContext";
 
 enableScreens();
-import { enableScreens } from 'react-native-screens';
-
-enableScreens();
 
 const Tab = createBottomTabNavigator();
 

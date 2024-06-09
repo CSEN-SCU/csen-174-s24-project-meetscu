@@ -1,29 +1,25 @@
-from flask import Flask, request, jsonify, render_template, redirect, url_for
+from flask import Flask, request, jsonify, render_template, redirect, url_for, session
 from pymongo import MongoClient, ReturnDocument
-<<<<<<< HEAD
 from bson import json_util, ObjectId
-=======
-from bson import json_util
-from bson import ObjectId
->>>>>>> cb48d1b90ca4607a123084ff77b1a01fca6b2eb6
 import json
 
 # Setup connection to MongoDB
 app = Flask(__name__)
+app.secret_key = 'your_secret_key'  # Needed for session handling
 client = MongoClient("mongodb://localhost:27017/")
 db = client["friend_matching_db"]
 users_collection = db["users"]
 counter_collection = db["counters"]
 
-if counter_collection.count_documents({"_id": "user_id"}) == 0:
-    counter_collection.insert_one({"_id": "user_id", "seq": 0})
+if counter_collection.count_documents({"_id": "email"}) == 0:
+    counter_collection.insert_one({"_id": "email", "seq": 0})
 
 def parse_json(data):
     return json.loads(json_util.dumps(data))
 
-def get_next_user_id():
+def get_next_email():
     counter = counter_collection.find_one_and_update(
-        {"_id": "user_id"},
+        {"_id": "email"},
         {"$inc": {"seq": 1}},
         return_document=ReturnDocument.AFTER
     )
@@ -36,11 +32,6 @@ def calculate_compatibility(user1, user2):
 
     activities1 = {act["activity"]: act for act in user1["activities"]}
     activities2 = {act["activity"]: act for act in user2["activities"]}
-<<<<<<< HEAD
-    
-=======
-
->>>>>>> cb48d1b90ca4607a123084ff77b1a01fca6b2eb6
     for activity in activities1:
         if activity in activities2:
             interest_user1 = activities1[activity]["interest_level"]
@@ -64,52 +55,39 @@ def calculate_compatibility(user1, user2):
 
     # Calculate the compatibility percentage
     compatibility_percentage = (total_score / total_possible_score) if total_possible_score > 0 else 0
+    print(compatibility_percentage)
     return compatibility_percentage
 
-def update_compatibility_scores(new_user):
-    existing_users = list(users_collection.find())
-<<<<<<< HEAD
-=======
-
->>>>>>> cb48d1b90ca4607a123084ff77b1a01fca6b2eb6
-    # Calculate compatibility scores for the new user with all existing users
-    new_user_scores = []
+def update_compatibility_scores(updated_user):
+    existing_users = list(users_collection.find({"email": {"$ne": updated_user["email"]}}))
+    
+    # Calculate compatibility scores for the updated user with all existing users
+    updated_user_scores = []
     for user in existing_users:
-        score = calculate_compatibility(new_user, user)
-        new_user_scores.append({"user_id": user["user_id"], "score": score})
-<<<<<<< HEAD
-    new_user_scores = sorted(new_user_scores, key=lambda x: x["score"], reverse=True)
-=======
-
-    new_user_scores = sorted(new_user_scores, key=lambda x: x["score"], reverse=True)
-
->>>>>>> cb48d1b90ca4607a123084ff77b1a01fca6b2eb6
-    new_user["compatibility_scores"] = new_user_scores
-    new_user_id = users_collection.insert_one(new_user).inserted_id
-
-    for user in existing_users:
-        score = calculate_compatibility(user, new_user)
+        print(user)
+        print("HI")
+        score = calculate_compatibility(updated_user, user)
+        updated_user_scores.append({"email": user["email"], "score": score})
+        # Update the score for the existing user
         users_collection.update_one(
             {"_id": user["_id"]},
-            {"$push": {"compatibility_scores": {"user_id": new_user["user_id"], "score": score}}}
+            {"$push": {"compatibility_scores": {"email": updated_user["email"], "score": score}}}
         )
-<<<<<<< HEAD
     
-=======
+    updated_user_scores = sorted(updated_user_scores, key=lambda x: x["score"], reverse=True)
+    users_collection.update_one(
+        {"_id": updated_user["_id"]},
+        {"$set": {"compatibility_scores": updated_user_scores}}
+    )
 
->>>>>>> cb48d1b90ca4607a123084ff77b1a01fca6b2eb6
+    # Ensure all compatibility scores for existing users are sorted
     for user in existing_users:
-        updated_user = users_collection.find_one({"_id": user["_id"]})
-        sorted_scores = sorted(updated_user["compatibility_scores"], key=lambda x: x["score"], reverse=True)
+        sorted_scores = sorted(user["compatibility_scores"], key=lambda x: x["score"], reverse=True)
         users_collection.update_one(
             {"_id": user["_id"]},
             {"$set": {"compatibility_scores": sorted_scores}}
         )
-<<<<<<< HEAD
-    
-=======
 
->>>>>>> cb48d1b90ca4607a123084ff77b1a01fca6b2eb6
 @app.route("/")
 def index():
     users = list(users_collection.find())
@@ -118,11 +96,11 @@ def index():
 @app.route("/submit", methods=["POST"])
 def submit_interests():
     try:
-<<<<<<< HEAD
+        email = session.get('email')  # Assuming email is stored in session
+        if not email:
+            return jsonify({"error": "Email is required"}), 400
+
         print(f"Request form data: {request.form.to_dict()}")
-=======
-        print(f"Request form data: {request.form}")
->>>>>>> cb48d1b90ca4607a123084ff77b1a01fca6b2eb6
 
         activities_data = []
 
@@ -145,21 +123,29 @@ def submit_interests():
 
                 activities_data.append(activity_data)
 
-        user_id = get_next_user_id()
-
-        new_user_data = {
-            "user_id": user_id,
-            "activities": activities_data,
-            "compatibility_scores": []
-        }
-<<<<<<< HEAD
-        
-        print("New user data:", new_user_data)
-=======
->>>>>>> cb48d1b90ca4607a123084ff77b1a01fca6b2eb6
-
-        # Update compatibility scores and store the new user data
-        update_compatibility_scores(new_user_data)
+        existing_user = users_collection.find_one({"email": email})
+        if existing_user:
+            # Update existing user activities
+            users_collection.update_one(
+                {"email": email},
+                {"$set": {
+                    "activities": activities_data,
+                    "compatibility_scores": []  # Ensure compatibility_scores field is present
+                }}
+            )
+            existing_user["activities"] = activities_data
+            existing_user["compatibility_scores"] = []  # Ensure compatibility_scores field is present
+            update_compatibility_scores(existing_user)
+        else:
+            email = get_next_email()
+            new_user_data = {
+                "email": email,
+                "email": email,
+                "activities": activities_data,
+                "compatibility_scores": []  # Ensure compatibility_scores field is present
+            }
+            new_user_data["_id"] = users_collection.insert_one(new_user_data).inserted_id
+            update_compatibility_scores(new_user_data)
 
         return redirect(url_for("index"))
 
@@ -167,66 +153,66 @@ def submit_interests():
         print(f"Exception occurred: {e}")
         return jsonify({"error": str(e)}), 500
 
-# after logging in, store user in database
+
 @app.route("/loggedIn", methods=["POST"])
 def loggedIn():
     try:
         userData = request.get_json()
         userData["likes"] = []
         userData["matches"] = []
-<<<<<<< HEAD
-        print("Logging in", userData)
-=======
         print("Request data", userData)
->>>>>>> cb48d1b90ca4607a123084ff77b1a01fca6b2eb6
+        # Store email in session
+        session['email'] = userData["email"]
         # Check if the user already exists
         existing_user = users_collection.find_one({"email": userData["email"]})
         if existing_user:
             print("User already exists in the database")
             return '', 200
-<<<<<<< HEAD
-        id = users_collection.insert_one(userData).inserted_id
-        userData['_id'] = str(id)
-        return parse_json(userData), 200
-=======
         users_collection.insert_one(userData)
         return '', 200
->>>>>>> cb48d1b90ca4607a123084ff77b1a01fca6b2eb6
     except Exception as e:
         print(f"Exception occurred: {e}")
         return jsonify({"error": str(e)}), 500
 
-# get user data
 @app.route("/getUser", methods=["GET"])
 def getUser():
     try:
-<<<<<<< HEAD
-        userData = request.args.to_dict()
-=======
         email = request.args.get('email')        
->>>>>>> cb48d1b90ca4607a123084ff77b1a01fca6b2eb6
         user = users_collection.find_one({
             "email": email
-        }, {"user_id": 1, "email": 1, "name": 1, "photo": 1, "likes": 1, "matches": 1})  # Include user_id explicitly
+        }, {"user_id": 1, "email": 1, "name": 1, "photo": 1, "likes": 1, "matches": 1, "compatibility_scores": 1})  # Include email explicitly
         if user is None:
-<<<<<<< HEAD
-            return 'User not found', 204
-=======
             return jsonify({"error": "User not found"}), 404
         print("USER DATA", user)
->>>>>>> cb48d1b90ca4607a123084ff77b1a01fca6b2eb6
         return parse_json(user), 200
     except Exception as e:
         print(f"Exception occurred: {e}")
         return jsonify({"error": str(e)}), 500
 
+@app.route("/getUsers", methods=["GET"])
+def getUsers():
+    try:
+        # Get the logged-in user's email from the request parameters
+        email = request.args.get('email')
+        users = list(users_collection.find({"email": {"$ne": email}}, {"email": 1, "likes": 2}))  # Include user_id explicitly
+        print("HERHE")
+        print(users)
+        return {"users": parse_json(users)}, 200
+    except Exception as e:
+        print(f"Exception occurred: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+
+
+
 @app.route("/getUserById", methods=["GET"])
 def get_user_by_id():
     try:
-        user_id = request.args.get('user_id')
-        print(f"Fetching data for user_id: {user_id}")
+        email = request.args.get('email')
+        print(f"Fetching data for email: {email}")
 
-        user = users_collection.find_one({"_id": ObjectId(user_id)})
+        user = users_collection.find_one({"_id": ObjectId(email)})
         if user is None:
             return jsonify({"error": "User not found"}), 404
 
@@ -236,14 +222,13 @@ def get_user_by_id():
             "email": user["email"],
             "photo": user["photo"],
             "likes": user.get("likes", []),
-            "matches": [str(match_id) for match_id in user.get("matches", [])]
+            "matches": [str(match_id) for match_id in user.get("matches", [])],
+            "compatibility_scores": user.get("compatibility_scores", [])
         }
         return jsonify(user_data), 200
     except Exception as e:
         print(f"Exception occurred: {e}")
         return jsonify({"error": str(e)}), 500
-
-
 
 @app.route("/like", methods=["POST"])
 def like():
@@ -255,67 +240,85 @@ def like():
             print("No data received in the request.")
             return jsonify({"error": "No data received"}), 400
         
-        if "user_email" not in data or "liked_user_id" not in data:
+        if "user_email" not in data or "liked_email" not in data:
             print("Request data missing required fields. Data received:", data)
             return jsonify({"error": "Request data missing required fields"}), 400
 
         user_email = data["user_email"]
-        liked_user_id = data["liked_user_id"]  
-
-        # Extract ObjectId if provided as $oid
-        if isinstance(liked_user_id, dict) and "$oid" in liked_user_id:
-            liked_user_id = ObjectId(liked_user_id["$oid"])
+        liked_email = data["liked_email"]  
 
         user = users_collection.find_one({"email": user_email})
-        liked_user = users_collection.find_one({"_id": liked_user_id})
+        liked_user = users_collection.find_one({"email": liked_email})
 
         if not user:
             print("User email bad")
         if not liked_user:
-            print("Liked user id bad")
+            print("Liked user email bad")
 
         if not user or not liked_user:
-            print(f"User or liked user not found: user_email={user_email}, liked_user_id={liked_user_id}")
+            print(f"User or liked user not found: user_email={user_email}, liked_email={liked_email}")
             return jsonify({"error": "User not found"}), 404
 
-        print(f"User {user['email']} liked user {liked_user_id}")
+        print(f"User {user['email']} liked user {liked_email}")
 
         # Add liked user to the user's likes
         users_collection.update_one(
             {"email": user_email},
-            {"$addToSet": {"likes": liked_user_id}}
+            {"$addToSet": {"likes": liked_email}}
         )
 
         # Check if the liked user also likes the user
-        if user["_id"] in liked_user.get("likes", []):
-            print(f"User {liked_user_id} also liked user {user['email']}. Creating a match.")
+        if user_email in liked_user.get("likes", []):
+            print(f"User {liked_email} also liked user {user_email}. Creating a match.")
 
             # Add each other to matches
             users_collection.update_one(
                 {"email": user_email},
-                {"$addToSet": {"matches": liked_user_id}}
+                {"$addToSet": {"matches": liked_email}}
             )
             users_collection.update_one(
-                {"_id": liked_user_id},
-                {"$addToSet": {"matches": user["_id"]}}
+                {"email": liked_email},
+                {"$addToSet": {"matches": user_email}}
             )
 
             # Remove from likes
             users_collection.update_one(
                 {"email": user_email},
-                {"$pull": {"likes": liked_user_id}}
+                {"$pull": {"likes": liked_email}}
             )
             users_collection.update_one(
-                {"_id": liked_user_id},
-                {"$pull": {"likes": user["_id"]}}
+                {"email": liked_email},
+                {"$pull": {"likes": user_email}}
             )
+
+            # Find the most liked activity they have in common
+            common_activities = set(user["likes"]).intersection(set(liked_user["likes"]))
+            most_liked_activity = None
+            max_likes = 0
+            for activity in common_activities:
+                likes_count = user["likes"].count(activity)
+                if likes_count > max_likes:
+                    max_likes = likes_count
+                    most_liked_activity = activity
+
+            # Update the database with the most liked activity they have in common
+            users_collection.update_one(
+                {"email": user_email},
+                {"$set": {"most_liked_activity": most_liked_activity}}
+            )
+            users_collection.update_one(
+                {"email": liked_email},
+                {"$set": {"most_liked_activity": most_liked_activity}}
+            )
+
         else:
-            print(f"User {liked_user_id} has not liked user {user['email']} back yet.")
+            print(f"User {liked_email} has not liked user {user_email} back yet.")
 
         return '', 200
     except Exception as e:
         print(f"Exception occurred: {e}")
         return jsonify({"error": str(e)}), 500
+
 
 if __name__ == "__main__":
     app.run(debug=True)

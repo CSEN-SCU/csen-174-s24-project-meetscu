@@ -1,30 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Button } from 'react-native';
 import { GoogleSignin, GoogleSigninButton, statusCodes } from '@react-native-google-signin/google-signin';
-<<<<<<< HEAD
-import UserContext from '../utils/UserContext';
-import AuthContext from '../utils/AuthContext';
-import axios from 'axios';
-import signOut from '../utils/signOut';
-import { useNavigation } from '@react-navigation/native';
-=======
->>>>>>> cb48d1b90ca4607a123084ff77b1a01fca6b2eb6
 import UserContext from '../navigation/UserContext';
 import AppNavigation from '../navigation/AppNavigation';
 import axios from 'axios';
 
 export default function LoginScreen(){
-<<<<<<< HEAD
-  const [error, setError] = useState(null);
-  const { isLoggedIn, setIsLoggedIn } = React.useContext(AuthContext);
-  const { user, setUser } = React.useContext(UserContext);
-  const navigation = useNavigation();
-  const userSignOut = signOut();
-=======
   const [error, setError] = useState();
   const [authenticated, setAuthenticated] = useState(false);
   const { user, setUser } = React.useContext(UserContext);
->>>>>>> cb48d1b90ca4607a123084ff77b1a01fca6b2eb6
 
   // configure google sign in
   const configureGoogleSignIn = () => {
@@ -50,47 +34,6 @@ export default function LoginScreen(){
     }
   };
 
-<<<<<<< HEAD
-  const sendUser = async (user) => {
-    try{
-      // try logging in first, if user does not exist, send new user data to backend
-      const logInResponse = await axios.get(
-        "http://127.0.0.1:5000/getUser", {
-          params: {
-            email: user.email,
-            name: user.name,
-            photo: user.photo
-          }
-        }
-      );
-      if(logInResponse.status === 200){
-        // successfully logged in
-        console.log("User logged in");
-        setIsLoggedIn(true);
-        setUser(logInResponse.data);
-      } else if(logInResponse.status === 204){
-        // cannnot find user in database so send new user data
-        console.log("Create new user");
-        const sendUserDataResponse = await axios.post(
-          "http://127.0.0.1:5000/loggedIn",
-          {
-            email: user.email,
-            name: user.name,
-            photo: user.photo
-          }
-        );
-        if(sendUserDataResponse.status === 200){
-          // successfully sent new data
-          setIsLoggedIn(true);
-          setUser(sendUserDataResponse.data);
-        } else {
-          // error in creating profile
-          console.error("Failed to send user data to backend");
-        }
-      } else {
-        // error in logging in
-        console.error("Failed to log in user")
-=======
   // sign out
   const signOut = async () => {
     try {
@@ -118,7 +61,6 @@ export default function LoginScreen(){
         setAuthenticated(true);
       } else {
         console.error("Failed to send user data to backend");
->>>>>>> cb48d1b90ca4607a123084ff77b1a01fca6b2eb6
       }
     } catch(error){
       console.log(error);
@@ -126,20 +68,6 @@ export default function LoginScreen(){
   }
 
   useEffect(() => {
-<<<<<<< HEAD
-    if(!isLoggedIn && user && user.email && user.email.endsWith("@scu.edu")){
-      // if SCU email set user and insert into database
-      sendUser(user);
-      navigation.navigate('Main');
-    }
-    if(!isLoggedIn && user && user.email && !user.email.endsWith("@scu.edu")){
-      // not an SCU email
-      console.log("Invalid Email");
-      setError("Email entered is not an SCU email. Please sign in with your SCU email.");
-      userSignOut();
-    }
-  }, [user, isLoggedIn]);
-=======
     if(user && !user.email.endsWith("@scu.edu")){
       console.log("INVALID EMAIL")
       setError("Email entered is not an SCU email. Please sign in with your SCU email.")
@@ -156,7 +84,6 @@ export default function LoginScreen(){
   if(authenticated){
     return <AppNavigation/>;
   }
->>>>>>> cb48d1b90ca4607a123084ff77b1a01fca6b2eb6
 
   console.log("Rendering LoginScreen")
   return(
