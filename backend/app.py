@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify, render_template, redirect, url_for, s
 from pymongo import MongoClient, ReturnDocument
 from bson import json_util, ObjectId
 import json
+import random
 
 # Setup connection to MongoDB
 app = Flask(__name__)
@@ -318,6 +319,19 @@ def like():
     except Exception as e:
         print(f"Exception occurred: {e}")
         return jsonify({"error": str(e)}), 500
+
+@app.route("/check_matches", methods=["GET"])
+def check_matches():
+    user_email = request.args.get('email')
+    user = users_collection.find_one({"email": user_email}, {"matches": 1})
+    print(user_email)
+    if user and "matches" in user and len(user["matches"]) >= 2:
+        #show_popup = random.choice([True, False])  # 50% chance
+        #return jsonify({"show_popup": show_popup}), 200
+        print("popup should happen")
+        return jsonify({"show_popup": True}), 200
+    else:
+        return jsonify({"show_popup": False}), 200
 
 
 if __name__ == "__main__":

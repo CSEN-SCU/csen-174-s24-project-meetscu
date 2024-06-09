@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Image, Button } from "react-native";
+import { View, Text, StyleSheet, Image, Button, Modal, TouchableOpacity } from "react-native";
 import React, { useState, useEffect, useRef, useContext } from "react";
 import UserContext from "../navigation/UserContext";
 import axios from "axios";
@@ -17,6 +17,8 @@ export default function MeetScreen() {
   const [cards, setCards] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const currentCardRef = useRef(null);
+  const [showPopup, setShowPopup] = useState(false);
+
   console.log("Test");
   useEffect(() => {
     // Fetch user data from backend
@@ -44,6 +46,10 @@ export default function MeetScreen() {
           });
         });
         setCards(response.data.users);
+        // Check for popup condition
+        if (detailedMatches.length >= 3) {
+          checkForPopup(user.email);
+        }
       })
       .catch(error => {
         console.log('Error fetching users:', error);
@@ -90,8 +96,46 @@ export default function MeetScreen() {
     }
   };
 
+  useEffect(() => {
+    // Check for popup condition when the component first loads
+    checkForPopup(user.email);
+  }, []); // Empty dependency array to run once after initial render
+
+  const checkForPopup = (email) => {
+    axios
+      .get("http://127.0.0.1:5000/check_matches", {
+        params: { email: email },
+      })
+      .then((response) => {
+        if (response.data.show_popup) {
+          setShowPopup(true);
+        }
+      })
+      .catch((error) => {
+        console.error("Error checking for popup:", error);
+      });
+  };
+
   return (
     <View style={styles.container}>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={showPopup}
+        onRequestClose={() => setShowPopup(false)}
+      >
+        <View style={styles.popupContainer}>
+          <View style={styles.popup}>
+            <Text style={styles.popupText}>You have at least 2 matches! If you have connected with a match, we encourage that you delete the app :{')'}</Text>
+            <TouchableOpacity
+              style={styles.popupButton}
+              onPress={() => setShowPopup(false)}
+            >
+              <Text style={styles.popupButtonText}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
       {currentIndex < cards.length ? (
         <TinderCard
           ref={currentCardRef}
@@ -145,5 +189,32 @@ const styles = StyleSheet.create({
     marginTop: 20,
     justifyContent: 'space-between',
     width: '80%',
+  },
+  popupContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.5)",
+  },
+  popup: {
+    width: 300,
+    padding: 20,
+    backgroundColor: "white",
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  popupText: {
+    fontSize: 18,
+    marginBottom: 10,
+  },
+  popupButton: {
+    marginTop: 10,
+    padding: 10,
+    backgroundColor: "#2196F3",
+    borderRadius: 5,
+  },
+  popupButtonText: {
+    color: "white",
+    fontSize: 16,
   },
 });
