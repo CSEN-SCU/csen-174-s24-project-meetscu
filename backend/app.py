@@ -26,10 +26,42 @@ def get_next_email():
     )
     return counter["seq"]
 
-# Function to calculate compatibility score
+
+def get_highest_matched_activity(user1_activities, user2_activities):
+    activities1 = {activity["activity"]: activity for activity in user1_activities}
+    activities2 = {activity["activity"]: activity for activity in user2_activities}
+    
+    best_match = None
+    highest_score = -1  # Initialize with a value lower than any possible score
+
+    for activity in activities1:
+        if activity in activities2:
+            interest_user1 = activities1[activity]["interest_level"]
+            interest_user2 = activities2[activity]["interest_level"]
+            desired_interest_user1 = activities1[activity]["desired_interest_level"]
+            desired_interest_user2 = activities2[activity]["desired_interest_level"]
+
+            # Ensure we have valid data
+            if interest_user1 is None or interest_user2 is None or desired_interest_user1 is None or desired_interest_user2 is None:
+                continue
+
+            # Calculate the compatibility score for this activity
+            score = (
+                (min(interest_user1, interest_user2) / max(interest_user1, interest_user2, 1)) +
+                (min(desired_interest_user1, desired_interest_user2) / max(desired_interest_user1, desired_interest_user2, 1))
+            )
+
+            if score > highest_score:
+                highest_score = score
+                best_match = activity
+
+    return best_match
+
 def calculate_compatibility(user1, user2):
     total_score = 0
     total_possible_score = 1
+    best_match = None
+    highest_score = -1  # Initialize with a value lower than any possible score
 
     activities1 = {act["activity"]: act for act in user1["activities"]}
     activities2 = {act["activity"]: act for act in user2["activities"]}
@@ -54,10 +86,17 @@ def calculate_compatibility(user1, user2):
             total_score += activity_score + desired_activity_score
             total_possible_score += 2
 
+            # Calculate the compatibility score for this activity
+            score = activity_score + desired_activity_score
+
+            if score > highest_score:
+                highest_score = score
+                best_match = activity
+
     # Calculate the compatibility percentage
     compatibility_percentage = (total_score / total_possible_score) if total_possible_score > 0 else 0
     print(compatibility_percentage)
-    return compatibility_percentage
+    return compatibility_percentage, best_match
 
 def update_compatibility_scores(updated_user):
     existing_users = list(users_collection.find({"email": {"$ne": updated_user["email"]}}))
@@ -67,12 +106,12 @@ def update_compatibility_scores(updated_user):
     for user in existing_users:
         print(user)
         print("HI")
-        score = calculate_compatibility(updated_user, user)
-        updated_user_scores.append({"email": user["email"], "score": score})
-        # Update the score for the existing user
+        score, best_match = calculate_compatibility(updated_user, user)
+        updated_user_scores.append({"email": user["email"], "score": score, "best_match": best_match})
+        # Update the score and best_match for the existing user
         users_collection.update_one(
-            {"_id": user["_id"]},
-            {"$push": {"compatibility_scores": {"email": updated_user["email"], "score": score}}}
+            {"_id": user["_id"], "compatibility_scores.email": updated_user["email"]},
+            {"$set": {"compatibility_scores.$.score": score, "compatibility_scores.$.best_match": best_match}}
         )
     
     updated_user_scores = sorted(updated_user_scores, key=lambda x: x["score"], reverse=True)
@@ -293,11 +332,11 @@ def like():
             )
 
             # Find the most liked activity they have in common
-            common_activities = set(user["likes"]).intersection(set(liked_user["likes"]))
+            common_activities = set(user["activities"]).intersection(set(liked_user["activities"]))
             most_liked_activity = None
             max_likes = 0
             for activity in common_activities:
-                likes_count = user["likes"].count(activity)
+                likes_count = user["activities"].count(activity)
                 if likes_count > max_likes:
                     max_likes = likes_count
                     most_liked_activity = activity

@@ -4,15 +4,14 @@ import UserContext from "../navigation/UserContext";
 import axios from "axios";
 import TinderCard from "./TinderCard"; // Assuming you have a TinderCard component
 
-const Card = ({ user }) => (
+const Card = ({ user, bestMatch }) => (
   <View style={styles.card}>
     <Image source={{ uri: user.photo }} style={styles.image} />
     <Text style={styles.name}>{user.name}</Text>
     <Text style={styles.email}>{user.email}</Text>
+    {bestMatch && <Text style={styles.bestMatch}>Best Match Activity: {bestMatch}</Text>}
   </View>
 );
-
-
 
 export default function MeetScreen() {
   const { user, setUser } = useContext(UserContext);
@@ -21,89 +20,68 @@ export default function MeetScreen() {
   const currentCardRef = useRef(null);
   const [showPopup, setShowPopup] = useState(false);
 
-  console.log("Test");
   useEffect(() => {
-    // Fetch user data from backend
-    axios.get("http://127.0.0.1:5000/getUser", {
-      params: { email: user.email }
-    })
-    .then(response => {
-      console.log("GETTING USER RESPONSE: ", response.data);
-      setUser(response.data);
-    })
-    .catch(error => {
-      console.log(error);
-    });
-
-    axios.get("http://127.0.0.1:5000/getUsers", {
-      params: { email: user.email }
-    })
+    axios.get("http://127.0.0.1:5000/getUser", { params: { email: user.email } })
       .then(response => {
-        console.log('Received users:', response.data.users);
-        // response.data.users.forEach(user => {
-        //   console.log(`User: ${user.email}`);
-        //   console.log('Likes:');
-        //   user.likes.forEach(like => {
-        //     console.log(`- ${like.email}`);
-        //   });
-        // });
+        setUser(response.data);
+      })
+      .catch(error => {
+        console.log(error);
+      });
+
+    axios.get("http://127.0.0.1:5000/getUsers", { params: { email: user.email } })
+      .then(response => {
         setCards(response.data.users);
       })
       .catch(error => {
         console.log('Error fetching users:', error);
       });
-    
-  }, [user.email], [user.likes]);
+  }, [user.email]);
+
+  const getBestMatch = (otherUserEmail) => {
+    const compatibilityScore = user.compatibility_scores.find(score => score.email === otherUserEmail);
+    return compatibilityScore ? compatibilityScore.best_match : null;
+  };
 
   const handleCardLeftScreen = (direction) => {
-    console.log(`Card left the screen ${direction}`);
-    
     if (currentIndex >= cards.length) {
-      console.error("Index out of bounds");
       return;
     }
-    
+
     const currentCard = cards[currentIndex];
-    if (!currentCard || !currentCard._id) { // Change user_id to _id
-      console.error("Current card or user ID is undefined:", currentCard);
+    if (!currentCard || !currentCard._id) {
       return;
     }
-    
+
     if (direction === "right") {
-      const likedUserEmail = currentCard.email; 
+      const likedUserEmail = currentCard.email;
       const payload = {
         user_email: user.email,
         liked_user_email: likedUserEmail
       };
-      console.log("Payload being sent:", payload);  // Add this line
       axios.post("http://127.0.0.1:5000/like", payload)
-      .then(response => {
-        console.log("User liked successfully!");
-      })
-      .catch(error => {
-        console.error("Error liking user:", error);
-      });
+        .then(response => {
+          console.log("User liked successfully!");
+        })
+        .catch(error => {
+          console.error("Error liking user:", error);
+        });
     }
     setCurrentIndex(currentIndex + 1);
-};
+  };
 
   const swipeCard = (dir) => {
-    console.log('All users:', cards);
     if (currentCardRef.current) {
       currentCardRef.current.swipe(dir);
     }
   };
 
   useEffect(() => {
-    // Check for popup condition when the component first loads
     checkForPopup(user.email);
-  }, []); // Empty dependency array to run once after initial render
+  }, []);
 
   const checkForPopup = (email) => {
-    axios
-      .get("http://127.0.0.1:5000/check_matches", {
-        params: { email: email },
-      })
+    axios.get("http://127.0.0.1:5000/check_matches", { params: { email: email } })
       .then((response) => {
         if (response.data.show_popup) {
           setShowPopup(true);
@@ -139,7 +117,7 @@ export default function MeetScreen() {
           ref={currentCardRef}
           onCardLeftScreen={handleCardLeftScreen}
         >
-          <Card user={cards[currentIndex]} />
+          <Card user={cards[currentIndex]} bestMatch={getBestMatch(cards[currentIndex].email)} />
         </TinderCard>
       ) : (
         <Text style={styles.text}>No more cards</Text>
@@ -177,6 +155,15 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: 'bold',
     marginTop: 10,
+  },
+  email: {
+    fontSize: 16,
+    color: 'gray',
+  },
+  bestMatch: {
+    marginTop: 10,
+    fontSize: 18,
+    color: 'blue',
   },
   text: {
     fontSize: 22,

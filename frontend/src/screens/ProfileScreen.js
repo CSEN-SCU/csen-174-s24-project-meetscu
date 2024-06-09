@@ -7,19 +7,28 @@ import RNPickerSelect from 'react-native-picker-select';
 
 export default function ProfileScreen() {
     const [interests, setInterests] = useState({
-        running: false,
-        gym: false,
-        eating: false
+        Running: false,
+        Gym: false,
+        Swimming: false,
+        Hiking: false,
+        Biking: false,
+        Studying: false
     });
     const [interestLevels, setInterestLevels] = useState({
         running: '',
         gym: '',
-        eating: ''
+        swimming: '',
+        hiking: '',
+        biking: '',
+        studying: ''
     });
     const [desiredInterestLevels, setDesiredInterestLevels] = useState({
         running: '',
         gym: '',
-        eating: ''
+        swimming: '',
+        hiking: '',
+        biking: '',
+        studying: ''
     });
     const navigation = useNavigation();
     //const userSignOut = signOut();
