@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useContext, useCallback } from "react";
 import { View, Text, StyleSheet, Image, FlatList } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
-import UserContext from "../navigation/UserContext";
+import UserContext from "../utils/UserContext";
+import AuthContext from "../utils/AuthContext";
 import axios from "axios";
 
 const MatchCard = ({ match }) => (
@@ -17,6 +18,7 @@ export default function ChatScreen() {
   const { user, setUser } = useContext(UserContext);
   const [matches, setMatches] = useState([]);
   const [matchDetails, setMatchDetails] = useState([]);
+  const { isLoggedIn } = useContext(AuthContext);
 
   const fetchMatchDetails = async (matchIds) => {
     try {
@@ -59,8 +61,10 @@ export default function ChatScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      fetchUserData();
-    }, [user.email])
+      if(user && user.email){
+        fetchUserData();
+      }
+    }, [user?.email])
   );
 
   const renderItem = ({ item }) => (
@@ -69,14 +73,18 @@ export default function ChatScreen() {
 
   return (
     <View style={styles.container}>
-      {matchDetails.length > 0 ? (
-        <FlatList
-          data={matchDetails}
-          keyExtractor={(item, index) => `${item._id.$oid}-${index}`}
-          renderItem={renderItem}
-        />
-      ) : (
-        <Text style={styles.text}>No matches yet</Text>
+      {!isLoggedIn ? <Text>Loading...</Text> : (
+        <>
+          {matchDetails.length > 0 ? (
+            <FlatList
+              data={matchDetails}
+              keyExtractor={(item, index) => `${item._id.$oid}-${index}`}
+              renderItem={renderItem}
+            />
+          ) : (
+            <Text style={styles.text}>No matches yet</Text>
+          )}
+        </>
       )}
     </View>
   );

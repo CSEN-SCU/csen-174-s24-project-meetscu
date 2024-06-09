@@ -1,14 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Button } from 'react-native';
 import { GoogleSignin, GoogleSigninButton, statusCodes } from '@react-native-google-signin/google-signin';
-import UserContext from '../navigation/UserContext';
+import UserContext from '../utils/UserContext';
+import AuthContext from '../utils/AuthContext';
 import AppNavigation from '../navigation/AppNavigation';
 import axios from 'axios';
+import signOut from '../utils/signOut';
+import { useNavigation } from '@react-navigation/native';
+
 
 export default function LoginScreen(){
   const [error, setError] = useState();
-  const [authenticated, setAuthenticated] = useState(false);
   const { user, setUser } = React.useContext(UserContext);
+  const { isLoggedIn, setIsLoggedIn } = React.useContext(AuthContext);
+  const navigation = useNavigation();
+  const userSignOut = signOut();
 
   // configure google sign in
   const configureGoogleSignIn = () => {
@@ -34,21 +40,9 @@ export default function LoginScreen(){
     }
   };
 
-  // sign out
-  const signOut = async () => {
-    try {
-      setUser(undefined);
-      await GoogleSignin.revokeAccess();
-      await GoogleSignin.signOut();
-      console.log("User signed out");
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
   const sendUser = async (user) => {
     try{
-      const sendUserDataResponse = await axios.post(
+      const logInResponse = await axios.post(
         "http://127.0.0.1:5000/loggedIn",
         {
           email: user.email,
@@ -56,34 +50,36 @@ export default function LoginScreen(){
           photo: user.photo
         }
       );
-      if(sendUserDataResponse.status === 200){
-        console.log("User data sent to backend");
-        setAuthenticated(true);
+      if(logInResponse.status == 200){
+        console.log("User logged in");
+        setIsLoggedIn(true);
+        setUser(logInResponse.data);
       } else {
-        console.error("Failed to send user data to backend");
+        console.log("Error logging in");
+        setError("Error logging in. Please try again.");
+        userSignOut();
       }
+
     } catch(error){
       console.log(error);
     }
   }
 
   useEffect(() => {
-    if(user && !user.email.endsWith("@scu.edu")){
-      console.log("INVALID EMAIL")
-      setError("Email entered is not an SCU email. Please sign in with your SCU email.")
-      signOut();
+    if(isLoggedIn && user && user.email){
+      navigation.navigate('Main');
     }
-  }, [user]);
-
-  useEffect(() => {
-    if(user && user.email.endsWith("@scu.edu")){
+    if(!isLoggedIn && user && user.email && user.email.endsWith("@scu.edu")){
+      // if SCU email set user and insert into database
       sendUser(user);
     }
-  }, [user]);
-
-  if(authenticated){
-    return <AppNavigation/>;
-  }
+    if(!isLoggedIn && user && user.email && !user.email.endsWith("@scu.edu")){
+      // not an SCU email
+      console.log("Invalid Email");
+      setError("Email entered is not an SCU email. Please sign in with your SCU email.");
+      userSignOut();
+    }
+  }, [user, isLoggedIn]);
 
   console.log("Rendering LoginScreen")
   return(

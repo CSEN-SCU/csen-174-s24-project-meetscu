@@ -1,15 +1,15 @@
-// AuthContext.js
-import React, { useState } from 'react';
+import React, { createContext, useState } from 'react';
 
-const AuthContext = React.createContext();
+const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
-    return (
-        <AuthContext.Provider value={{ isLoggedIn, setIsLoggedIn }}>
-            {children}
-        </AuthContext.Provider>
-    );
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  return (
+    <AuthContext.Provider value={{ isLoggedIn, setIsLoggedIn }}>
+      {children}
+    </AuthContext.Provider>
+  );
 };
 
 export default AuthContext;

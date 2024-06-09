@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import axios from 'axios';
 import signOut from '../utils/signOut';
@@ -31,7 +31,7 @@ export default function ProfileScreen() {
         studying: ''
     });
     const navigation = useNavigation();
-    //const userSignOut = signOut();
+    const userSignOut = signOut();
 
     const handleCheckboxChange = (interest) => {
         setInterests({
@@ -83,6 +83,9 @@ export default function ProfileScreen() {
 
     return (
         <View style={styles.container}>
+            <TouchableOpacity style={styles.signOutButton} onPress={userSignOut}>
+                <Text style={styles.signOutText}>Sign Out</Text>
+            </TouchableOpacity>
 
             <Text style={styles.title}>Interest Form</Text>
 
@@ -138,10 +141,11 @@ export default function ProfileScreen() {
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
+        display: 'flex',
         alignItems: 'center',
-        justifyContent: 'center',
         padding: 20,
+        paddingTop: 50,
+        marginTop: 10
     },
     signOutButton: {
         position: 'absolute',
@@ -195,5 +199,17 @@ const styles = StyleSheet.create({
     submitButtonText: {
         color: 'white',
         fontSize: 16,
+    },
+    signOutButton: {
+        position: 'absolute',
+        top: '20px',
+        right: '20px',
+        backgroundColor: 'red',
+        color: 'white',
+        fontSize: 16,
+        padding: '10px',
+        borderRadius: '5px',
+        textAlign: 'center',
+        cursor: 'pointer'
     },
 });

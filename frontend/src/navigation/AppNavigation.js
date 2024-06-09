@@ -6,22 +6,32 @@ import ChatScreen from '../screens/ChatScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import LoginScreen from "../screens/login";
 import { enableScreens } from 'react-native-screens';
-import AuthContext from "../utils/AuthContext";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 enableScreens();
 
+const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
 export default function AppNavigation() {
-  const [rightSwipes, setRightSwipes] = useState([]);
+  return (
+    <NavigationContainer>
+      <Stack.Navigator>
+        <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="Main" component={MainTabs} options={{ headerShown: false }} />
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+}
 
+const MainTabs = () => {
+  const [rightSwipes, setRightSwipes] = useState([]);
   const updateRightSwipes = (newSwipe) => {
     setRightSwipes((prevSwipes) => [...prevSwipes, newSwipe]);
   };
 
   return (
-    <NavigationContainer>
-      <Tab.Navigator>
+    <Tab.Navigator>
         <Tab.Screen name="Meet!">
           {() => <MeetScreen updateRightSwipes={updateRightSwipes} />}
         </Tab.Screen>
@@ -30,6 +40,5 @@ export default function AppNavigation() {
         </Tab.Screen>
         <Tab.Screen name="Profile" component={ProfileScreen} />
       </Tab.Navigator>
-    </NavigationContainer>
   );
 }
