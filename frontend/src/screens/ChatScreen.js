@@ -29,8 +29,8 @@ export default function ChatScreen() {
         // Create an array of promises
         const promises = matchIds.map((id) => {
           console.log("Fetching data for ID: ", id);
-          return axios.get("http://127.0.0.1:5000/getUserById", {
-            params: { user_id: id["$oid"] },
+          return axios.get("http://127.0.0.1:5000/getUser", {
+            params: { email: id },
           });
         });
 

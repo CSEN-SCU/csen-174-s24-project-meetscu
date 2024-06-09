@@ -8,8 +8,10 @@ const Card = ({ user }) => (
   <View style={styles.card}>
     <Image source={{ uri: user.photo }} style={styles.image} />
     <Text style={styles.name}>{user.name}</Text>
+    <Text style={styles.email}>{user.email}</Text>
   </View>
 );
+
 
 
 export default function MeetScreen() {
@@ -37,14 +39,14 @@ export default function MeetScreen() {
       params: { email: user.email }
     })
       .then(response => {
-        console.log('Received users:');
-        response.data.users.forEach(user => {
-          console.log(`User: ${user.email}`);
-          console.log('Likes:');
-          user.likes.forEach(like => {
-            console.log(`- ${like.email}`);
-          });
-        });
+        console.log('Received users:', response.data.users);
+        // response.data.users.forEach(user => {
+        //   console.log(`User: ${user.email}`);
+        //   console.log('Likes:');
+        //   user.likes.forEach(like => {
+        //     console.log(`- ${like.email}`);
+        //   });
+        // });
         setCards(response.data.users);
       })
       .catch(error => {
@@ -68,10 +70,10 @@ export default function MeetScreen() {
     }
     
     if (direction === "right") {
-      const likedUserId = currentCard._id; // Change user_id to _id
+      const likedUserEmail = currentCard.email; 
       const payload = {
         user_email: user.email,
-        liked_user_id: likedUserId
+        liked_user_email: likedUserEmail
       };
       console.log("Payload being sent:", payload);  // Add this line
       axios.post("http://127.0.0.1:5000/like", payload)

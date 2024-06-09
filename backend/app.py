@@ -195,7 +195,7 @@ def getUsers():
     try:
         # Get the logged-in user's email from the request parameters
         email = request.args.get('email')
-        users = list(users_collection.find({"email": {"$ne": email}}, {"email": 1, "likes": 2}))  # Include user_id explicitly
+        users = list(users_collection.find({"email": {"$ne": email}}, {"user_id": 1, "email": 1, "name": 1, "photo": 1, "likes": 1, "matches": 1, "compatibility_scores": 1}))  # Include user_id explicitly
         print("HERHE")
         print(users)
         return {"users": parse_json(users)}, 200
@@ -241,12 +241,12 @@ def like():
             print("No data received in the request.")
             return jsonify({"error": "No data received"}), 400
         
-        if "user_email" not in data or "liked_email" not in data:
+        if "user_email" not in data or "liked_user_email" not in data:
             print("Request data missing required fields. Data received:", data)
             return jsonify({"error": "Request data missing required fields"}), 400
 
         user_email = data["user_email"]
-        liked_email = data["liked_email"]  
+        liked_email = data["liked_user_email"]  
 
         user = users_collection.find_one({"email": user_email})
         liked_user = users_collection.find_one({"email": liked_email})
