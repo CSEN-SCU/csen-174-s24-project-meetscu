@@ -4,6 +4,7 @@ import axios from 'axios';
 import signOut from '../utils/signOut';
 import { useNavigation } from '@react-navigation/native';
 import RNPickerSelect from 'react-native-picker-select';
+import UserContext from '../utils/UserContext';
 
 export default function ProfileScreen() {
     const [interests, setInterests] = useState({
@@ -32,6 +33,7 @@ export default function ProfileScreen() {
     });
     const navigation = useNavigation();
     const userSignOut = signOut();
+    const { filledOutForm, setFilledOutForm } = React.useContext(UserContext);
 
     const handleCheckboxChange = (interest) => {
         setInterests({
@@ -79,6 +81,7 @@ export default function ProfileScreen() {
         } catch (error) {
             console.error('Error occurred:', error);
         }
+        setFilledOutForm(true);
     };
 
     return (

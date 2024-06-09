@@ -16,7 +16,7 @@ const Card = ({ user, bestMatch }) => (
 );
 
 export default function MeetScreen() {
-  const { user, setUser } = useContext(UserContext);
+  const { user, setUser, filledOutForm, setFilledOutForm } = useContext(UserContext);
   const [cards, setCards] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const currentCardRef = useRef(null);
@@ -29,7 +29,7 @@ export default function MeetScreen() {
       navigation.navigate('Login');
     }
   }, [user, isLoggedIn]);
-
+  console.log("FILLED OUT FORM: ", filledOutForm);
   useEffect(() => {
     if(user && isLoggedIn){
       axios.get("http://127.0.0.1:5000/getUser", { params: { email: user.email } })
@@ -48,7 +48,7 @@ export default function MeetScreen() {
           console.log('Error fetching users:', error);
         });
     }
-  }, [user?.email]);
+  }, [user?.email, filledOutForm]);
 
   const getBestMatch = (otherUserEmail) => {
     if (!user || !user.compatibility_scores) {
