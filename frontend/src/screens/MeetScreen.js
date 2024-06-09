@@ -46,10 +46,6 @@ export default function MeetScreen() {
           });
         });
         setCards(response.data.users);
-        // Check for popup condition
-        if (detailedMatches.length >= 3) {
-          checkForPopup(user.email);
-        }
       })
       .catch(error => {
         console.log('Error fetching users:', error);
