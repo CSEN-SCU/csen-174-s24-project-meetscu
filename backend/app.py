@@ -1,14 +1,11 @@
 from flask import Flask, request, jsonify, render_template, redirect, url_for, session
-from flask import Flask, request, jsonify, render_template, redirect, url_for, session
 from pymongo import MongoClient, ReturnDocument
 from bson import json_util, ObjectId
 import json
 import random
-import random
 
 # Setup connection to MongoDB
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'  # Needed for session handling
 app.secret_key = 'your_secret_key'  # Needed for session handling
 client = MongoClient("mongodb://localhost:27017/")
 db = client["friend_matching_db"]
@@ -197,7 +194,6 @@ def submit_interests():
         return jsonify({"error": str(e)}), 500
 
 
-
 @app.route("/loggedIn", methods=["POST"])
 def loggedIn():
     try:
@@ -222,7 +218,6 @@ def loggedIn():
 @app.route("/getUser", methods=["GET"])
 def getUser():
     try:
-        email = request.args.get('email')        
         email = request.args.get('email')        
         user = users_collection.find_one({
             "email": email
@@ -278,128 +273,7 @@ def get_user_by_id():
 
 @app.route("/like", methods=["POST"])
 def like():
-@app.route("/getUsers", methods=["GET"])
-def getUsers():
     try:
-        # Get the logged-in user's email from the request parameters
-        email = request.args.get('email')
-        users = list(users_collection.find({"email": {"$ne": email}}, {"user_id": 1, "email": 1, "name": 1, "photo": 1, "likes": 1, "matches": 1, "compatibility_scores": 1}))  # Include user_id explicitly
-        print("HERHE")
-        print(users)
-        return {"users": parse_json(users)}, 200
-    except Exception as e:
-        print(f"Exception occurred: {e}")
-        return jsonify({"error": str(e)}), 500
-
-
-
-
-
-@app.route("/getUserById", methods=["GET"])
-def get_user_by_id():
-    try:
-        email = request.args.get('email')
-        print(f"Fetching data for email: {email}")
-
-        user = users_collection.find_one({"_id": ObjectId(email)})
-        if user is None:
-            return jsonify({"error": "User not found"}), 404
-
-        user_data = {
-            "_id": str(user["_id"]),
-            "name": user["name"],
-            "email": user["email"],
-            "photo": user["photo"],
-            "likes": user.get("likes", []),
-            "matches": [str(match_id) for match_id in user.get("matches", [])],
-            "compatibility_scores": user.get("compatibility_scores", [])
-        }
-        return jsonify(user_data), 200
-    except Exception as e:
-        print(f"Exception occurred: {e}")
-        return jsonify({"error": str(e)}), 500
-
-@app.route("/like", methods=["POST"])
-def like():
-    try:
-        data = request.get_json()
-        print(f"Received like request data: {data}")
-        
-        if not data:
-            print("No data received in the request.")
-            return jsonify({"error": "No data received"}), 400
-        
-        if "user_email" not in data or "liked_user_email" not in data:
-            print("Request data missing required fields. Data received:", data)
-            return jsonify({"error": "Request data missing required fields"}), 400
-
-        user_email = data["user_email"]
-        liked_email = data["liked_user_email"]  
-
-        user = users_collection.find_one({"email": user_email})
-        liked_user = users_collection.find_one({"email": liked_email})
-
-        if not user:
-            print("User email bad")
-        if not liked_user:
-            print("Liked user email bad")
-
-        if not user or not liked_user:
-            print(f"User or liked user not found: user_email={user_email}, liked_email={liked_email}")
-            return jsonify({"error": "User not found"}), 404
-
-        print(f"User {user['email']} liked user {liked_email}")
-
-        # Add liked user to the user's likes
-        users_collection.update_one(
-            {"email": user_email},
-            {"$addToSet": {"likes": liked_email}}
-        )
-
-        # Check if the liked user also likes the user
-        if user_email in liked_user.get("likes", []):
-            print(f"User {liked_email} also liked user {user_email}. Creating a match.")
-
-            # Add each other to matches
-            users_collection.update_one(
-                {"email": user_email},
-                {"$addToSet": {"matches": liked_email}}
-            )
-            users_collection.update_one(
-                {"email": liked_email},
-                {"$addToSet": {"matches": user_email}}
-            )
-
-            # Remove from likes
-            users_collection.update_one(
-                {"email": user_email},
-                {"$pull": {"likes": liked_email}}
-            )
-            users_collection.update_one(
-                {"email": liked_email},
-                {"$pull": {"likes": user_email}}
-            )
-
-            # Find the most liked activity they have in common
-            common_activities = set(user["activities"]).intersection(set(liked_user["activities"]))
-            most_liked_activity = None
-            max_likes = 0
-            for activity in common_activities:
-                likes_count = user["activities"].count(activity)
-                if likes_count > max_likes:
-                    max_likes = likes_count
-                    most_liked_activity = activity
-
-            # Update the database with the most liked activity they have in common
-            users_collection.update_one(
-                {"email": user_email},
-                {"$set": {"most_liked_activity": most_liked_activity}}
-            )
-            users_collection.update_one(
-                {"email": liked_email},
-                {"$set": {"most_liked_activity": most_liked_activity}}
-            )
-
         data = request.get_json()
         print(f"Received like request data: {data}")
         
