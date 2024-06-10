@@ -1,8 +1,10 @@
 import { View, Text, StyleSheet, Image, Button, Modal, TouchableOpacity } from "react-native";
 import React, { useState, useEffect, useRef, useContext } from "react";
-import UserContext from "../navigation/UserContext";
+import UserContext from "../utils/UserContext";
+import AuthContext from "../utils/AuthContext";
 import axios from "axios";
 import TinderCard from "./TinderCard"; // Assuming you have a TinderCard component
+import { useNavigation } from '@react-navigation/native';
 
 const Card = ({ user, bestMatch }) => (
   <View style={styles.card}>
@@ -14,31 +16,44 @@ const Card = ({ user, bestMatch }) => (
 );
 
 export default function MeetScreen() {
-  const { user, setUser } = useContext(UserContext);
+  const { user, setUser, filledOutForm, setFilledOutForm } = useContext(UserContext);
   const [cards, setCards] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const currentCardRef = useRef(null);
   const [showPopup, setShowPopup] = useState(false);
+  const { isLoggedIn, setIsLoggedIn } = React.useContext(AuthContext);
+  const navigation = useNavigation();
 
   useEffect(() => {
-    axios.get("http://127.0.0.1:5000/getUser", { params: { email: user.email } })
-      .then(response => {
-        setUser(response.data);
-      })
-      .catch(error => {
-        console.log(error);
-      });
+    if(!user || !isLoggedIn){
+      navigation.navigate('Login');
+    }
+  }, [user, isLoggedIn]);
+  console.log("FILLED OUT FORM: ", filledOutForm);
+  useEffect(() => {
+    if(user && isLoggedIn){
+      axios.get("http://127.0.0.1:5000/getUser", { params: { email: user.email } })
+        .then(response => {
+          setUser(response.data);
+        })
+        .catch(error => {
+          console.log(error);
+        });
 
-    axios.get("http://127.0.0.1:5000/getUsers", { params: { email: user.email } })
-      .then(response => {
-        setCards(response.data.users);
-      })
-      .catch(error => {
-        console.log('Error fetching users:', error);
-      });
-  }, [user.email]);
+      axios.get("http://127.0.0.1:5000/getUsers", { params: { email: user.email } })
+        .then(response => {
+          setCards(response.data.users);
+        })
+        .catch(error => {
+          console.log('Error fetching users:', error);
+        });
+    }
+  }, [user?.email, filledOutForm]);
 
   const getBestMatch = (otherUserEmail) => {
+    if (!user || !user.compatibility_scores) {
+      return null;
+    }
     const compatibilityScore = user.compatibility_scores.find(score => score.email === otherUserEmail);
     return compatibilityScore ? compatibilityScore.best_match : null;
   };
@@ -92,42 +107,50 @@ export default function MeetScreen() {
       });
   };
 
+  console.log("USER", user);
+
   return (
     <View style={styles.container}>
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={showPopup}
-        onRequestClose={() => setShowPopup(false)}
-      >
-        <View style={styles.popupContainer}>
-          <View style={styles.popup}>
-            <Text style={styles.popupText}>You have at least 2 matches! If you have connected with a match, we encourage that you delete the app :{')'}</Text>
-            <TouchableOpacity
-              style={styles.popupButton}
-              onPress={() => setShowPopup(false)}
-            >
-              <Text style={styles.popupButtonText}>Close</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-      {currentIndex < cards.length ? (
-        <TinderCard
-          ref={currentCardRef}
-          onCardLeftScreen={handleCardLeftScreen}
-        >
-          <Card user={cards[currentIndex]} bestMatch={getBestMatch(cards[currentIndex].email)} />
-        </TinderCard>
+      {!user || !user['activities'] ? (
+        <Text>Please fill out your profile first</Text>
       ) : (
-        <Text style={styles.text}>No more cards</Text>
+        <>
+          <Modal
+          animationType="slide"
+          transparent={true}
+          visible={showPopup}
+          onRequestClose={() => setShowPopup(false)}>
+            <View style={styles.popupContainer}>
+              <View style={styles.popup}>
+                <Text style={styles.popupText}>You have at least 2 matches! If you have connected with a match, we encourage that you delete the app :{')'}</Text>
+                <TouchableOpacity
+                  style={styles.popupButton}
+                  onPress={() => setShowPopup(false)}
+                >
+                  <Text style={styles.popupButtonText}>Close</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Modal>
+          {currentIndex < cards.length ? (
+            <TinderCard
+              ref={currentCardRef}
+              onCardLeftScreen={handleCardLeftScreen}
+            >
+              <Card user={cards[currentIndex]} bestMatch={getBestMatch(cards[currentIndex].email)} />
+            </TinderCard>
+          ) : (
+            <Text style={styles.text}>No more cards</Text>
+          )}
+          <View style={styles.buttonsContainer}>
+            <Button title="Swipe Left" onPress={() => swipeCard("left")} />
+            <Button title="Swipe Right" onPress={() => swipeCard("right")} />
+          </View>
+        </>
       )}
-      <View style={styles.buttonsContainer}>
-        <Button title="Swipe Left" onPress={() => swipeCard("left")} />
-        <Button title="Swipe Right" onPress={() => swipeCard("right")} />
-      </View>
     </View>
   );
+
 }
 
 const styles = StyleSheet.create({

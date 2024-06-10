@@ -1,29 +1,39 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import axios from 'axios';
-import UserContext from "../utils/UserContext";
-import AuthContext from '../utils/AuthContext';
 import signOut from '../utils/signOut';
 import { useNavigation } from '@react-navigation/native';
+import RNPickerSelect from 'react-native-picker-select';
+import UserContext from '../utils/UserContext';
 
 export default function ProfileScreen() {
     const [interests, setInterests] = useState({
-        running: false,
-        gym: false,
-        eating: false
+        Running: false,
+        Gym: false,
+        Swimming: false,
+        Hiking: false,
+        Biking: false,
+        Studying: false
     });
     const [interestLevels, setInterestLevels] = useState({
         running: '',
         gym: '',
-        eating: ''
+        swimming: '',
+        hiking: '',
+        biking: '',
+        studying: ''
     });
     const [desiredInterestLevels, setDesiredInterestLevels] = useState({
         running: '',
         gym: '',
-        eating: ''
+        swimming: '',
+        hiking: '',
+        biking: '',
+        studying: ''
     });
+    const navigation = useNavigation();
     const userSignOut = signOut();
+    const { filledOutForm, setFilledOutForm } = React.useContext(UserContext);
 
     const handleCheckboxChange = (interest) => {
         setInterests({
@@ -46,14 +56,14 @@ export default function ProfileScreen() {
         });
     };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+    const handleSubmit = async () => {
         const selectedInterests = Object.keys(interests).filter(interest => interests[interest]);
         const formData = selectedInterests.map(interest => ({
             activity: interest,
             interest_level: interestLevels[interest],
             desired_interest_level: desiredInterestLevels[interest]
         }));
+        
         try {
             const response = await axios.post('http://127.0.0.1:5000/submit', formData, {
                 headers: {
@@ -63,15 +73,15 @@ export default function ProfileScreen() {
 
             if (response.status === 200) {
                 console.log('Interests submitted successfully');
-                // Handle success
+                // Navigate to HomeScreen after successful submission
+                navigation.navigate('HomeScreen');
             } else {
                 console.error('Failed to submit interests');
-                // Handle error
             }
         } catch (error) {
             console.error('Error occurred:', error);
-            // Handle error
         }
+        setFilledOutForm(true);
     };
 
     return (
@@ -81,105 +91,48 @@ export default function ProfileScreen() {
             </TouchableOpacity>
 
             <Text style={styles.title}>Interest Form</Text>
+
             <View style={styles.form}>
-                <TouchableOpacity
-                    style={styles.checkboxContainer}
-                    onPress={() => handleCheckboxChange('running')}
-                >
-                    <Text style={styles.checkboxLabel}>Running</Text>
-                </TouchableOpacity>
-                {interests.running && (
-                    <View style={styles.dropdown}>
-                        <Text>Interest Level:</Text>
-                        <Picker
-                            selectedValue={interestLevels.running}
-                            style={styles.select}
-                            onValueChange={(itemValue) => handleInterestLevelChange('running', itemValue)}
+                {Object.entries(interests).map(([interest, selected]) => (
+                    <View key={interest} style={styles.interestContainer}>
+                        <TouchableOpacity
+                            style={styles.checkboxContainer}
+                            onPress={() => handleCheckboxChange(interest)}
                         >
-                            <Picker.Item label="Not interested" value="1" />
-                            <Picker.Item label="Somewhat interested" value="2" />
-                            <Picker.Item label="Interested" value="3" />
-                            <Picker.Item label="Very interested" value="4" />
-                        </Picker>
-                        <Text>Desired Interest:</Text>
-                        <Picker
-                            selectedValue={desiredInterestLevels.running}
-                            style={styles.select}
-                            onValueChange={(itemValue) => handleDesiredInterestLevelChange('running', itemValue)}
-                        >
-                            <Picker.Item label="Not important" value="1" />
-                            <Picker.Item label="Somewhat important" value="2" />
-                            <Picker.Item label="Important" value="3" />
-                            <Picker.Item label="Very important" value="4" />
-                        </Picker>
+                            <Text style={styles.checkboxLabel}>{interest}</Text>
+                        </TouchableOpacity>
+                        {selected && (
+                            <View style={styles.dropdownContainer}>
+                                <Text>Interest Level:</Text>
+                                <View style={styles.dropdown}>
+                                    <RNPickerSelect
+                                        value={interestLevels[interest]}
+                                        onValueChange={(value) => handleInterestLevelChange(interest, value)}
+                                        items={[
+                                            { label: 'Not interested', value: '1' },
+                                            { label: 'Somewhat interested', value: '2' },
+                                            { label: 'Interested', value: '3' },
+                                            { label: 'Very interested', value: '4' },
+                                        ]}
+                                    />
+                                </View>
+                                <Text>Desired Interest:</Text>
+                                <View style={styles.dropdown}>
+                                    <RNPickerSelect
+                                        value={desiredInterestLevels[interest]}
+                                        onValueChange={(value) => handleDesiredInterestLevelChange(interest, value)}
+                                        items={[
+                                            { label: 'Not important', value: '1' },
+                                            { label: 'Somewhat important', value: '2' },
+                                            { label: 'Important', value: '3' },
+                                            { label: 'Very important', value: '4' },
+                                        ]}
+                                    />
+                                </View>
+                            </View>
+                        )}
                     </View>
-                )}
-
-                <TouchableOpacity
-                    style={styles.checkboxContainer}
-                    onPress={() => handleCheckboxChange('gym')}
-                >
-                    <Text style={styles.checkboxLabel}>Gym</Text>
-                </TouchableOpacity>
-                {interests.gym && (
-                    <View style={styles.dropdown}>
-                        <Text>Interest Level:</Text>
-                        <Picker
-                            selectedValue={interestLevels.gym}
-                            style={styles.select}
-                            onValueChange={(itemValue) => handleInterestLevelChange('gym', itemValue)}
-                        >
-                            <Picker.Item label="Not interested" value="1" />
-                            <Picker.Item label="Somewhat interested" value="2" />
-                            <Picker.Item label="Interested" value="3" />
-                            <Picker.Item label="Very interested" value="4" />
-                        </Picker>
-                        <Text>Desired Interest:</Text>
-                        <Picker
-                            selectedValue={desiredInterestLevels.gym}
-                            style={styles.select}
-                            onValueChange={(itemValue) => handleDesiredInterestLevelChange('gym', itemValue)}
-                        >
-                            <Picker.Item label="Not important" value="1" />
-                            <Picker.Item label="Somewhat important" value="2" />
-                            <Picker.Item label="Important" value="3" />
-                            <Picker.Item label="Very important" value="4" />
-                        </Picker>
-                    </View>
-                )}
-
-                <TouchableOpacity
-                    style={styles.checkboxContainer}
-                    onPress={() => handleCheckboxChange('eating')}
-                >
-                    <Text style={styles.checkboxLabel}>Eating</Text>
-                </TouchableOpacity>
-                {interests.eating && (
-                    <View style={styles.dropdown}>
-                        <Text>Interest Level:</Text>
-                        <Picker
-                            selectedValue={interestLevels.eating}
-                            style={styles.select}
-                            onValueChange={(itemValue) => handleInterestLevelChange('eating', itemValue)}
-                        >
-                            <Picker.Item label="Not interested" value="1" />
-                            <Picker.Item label="Somewhat interested" value="2" />
-                            <Picker.Item label="Interested" value="3" />
-                            <Picker.Item label="Very interested" value="4" />
-                        </Picker>
-                        <Text>Desired Interest:</Text>
-                        <Picker
-                            selectedValue={desiredInterestLevels.eating}
-                            style={styles.select}
-                            onValueChange={(itemValue) => handleDesiredInterestLevelChange('eating', itemValue)}
-                        >
-                            <Picker.Item label="Not important" value="1" />
-                            <Picker.Item label="Somewhat important" value="2" />
-                            <Picker.Item label="Important" value="3" />
-                            <Picker.Item label="Very important" value="4" />
-                        </Picker>
-                    </View>
-                )}
+                ))}
 
                 <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
                     <Text style={styles.submitButtonText}>Submit</Text>
@@ -189,40 +142,66 @@ export default function ProfileScreen() {
     );
 }
 
-const styles = {
+const styles = StyleSheet.create({
     container: {
         display: 'flex',
         alignItems: 'center',
-        // justifyContent: 'center',
-        padding: '20px',
+        padding: 20,
         paddingTop: 50,
         marginTop: 10
     },
+    signOutButton: {
+        position: 'absolute',
+        top: 20,
+        right: 20,
+        backgroundColor: 'red',
+        padding: 10,
+        borderRadius: 5,
+    },
+    signOutText: {
+        color: 'white',
+        fontSize: 16,
+    },
     title: {
-        fontSize: '24px',
+        fontSize: 24,
         fontWeight: 'bold',
-        marginBottom: '20px'
+        marginBottom: 20,
     },
     form: {
-        width: '80%'
+        width: '80%',
+    },
+    interestContainer: {
+        marginBottom: 20,
     },
     checkboxContainer: {
-        display: 'flex',
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: '10px'
+    },
+    checkboxLabel: {
+        fontSize: 18,
+    },
+    dropdownContainer: {
+        marginTop: 10,
     },
     dropdown: {
-        marginLeft: '20px',
-        marginBottom: '10px'
+        borderWidth: 1,
+        borderColor: 'gray',
+        borderRadius: 5,
+        marginBottom: 10,
+    },
+    select: {
+        width: '100%',
+        height: 50,
     },
     submitButton: {
         backgroundColor: 'blue',
+        padding: 10,
+        borderRadius: 5,
+        alignItems: 'center',
+    },
+    submitButtonText: {
         color: 'white',
-        padding: '10px',
-        borderRadius: '5px',
-        textAlign: 'center',
-        cursor: 'pointer'
+        fontSize: 16,
     },
     signOutButton: {
         position: 'absolute',
@@ -230,9 +209,10 @@ const styles = {
         right: '20px',
         backgroundColor: 'red',
         color: 'white',
+        fontSize: 16,
         padding: '10px',
         borderRadius: '5px',
         textAlign: 'center',
         cursor: 'pointer'
     },
-};
+});

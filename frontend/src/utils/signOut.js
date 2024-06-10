@@ -14,8 +14,8 @@ const signOut = () => {
     const deleteAndSignOut = async () => {
         try {
             console.log("Signing out")
-            setUser(null);
             setIsLoggedIn(false);
+            setUser(null);
             await GoogleSignin.revokeAccess();
             await GoogleSignin.signOut();
             navigation.navigate('Login');

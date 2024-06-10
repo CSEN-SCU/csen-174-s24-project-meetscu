@@ -207,9 +207,10 @@ def loggedIn():
         existing_user = users_collection.find_one({"email": userData["email"]})
         if existing_user:
             print("User already exists in the database")
-            return '', 200
-        users_collection.insert_one(userData)
-        return '', 200
+            return parse_json(existing_user), 200
+        id = users_collection.insert_one(userData).inserted_id
+        userData['_id'] = str(id)
+        return parse_json(userData), 200
     except Exception as e:
         print(f"Exception occurred: {e}")
         return jsonify({"error": str(e)}), 500
@@ -220,9 +221,9 @@ def getUser():
         email = request.args.get('email')        
         user = users_collection.find_one({
             "email": email
-        }, {"user_id": 1, "email": 1, "name": 1, "photo": 1, "likes": 1, "matches": 1, "compatibility_scores": 1})  # Include email explicitly
+        }, {"user_id": 1, "email": 1, "name": 1, "photo": 1, "likes": 1, "matches": 1, "activities": 1, "compatibility_scores": 1})  # Include email explicitly
         if user is None:
-            return jsonify({"error": "User not found"}), 404
+            return jsonify({"error": "User not found"}), 204
         print("USER DATA", user)
         return parse_json(user), 200
     except Exception as e:

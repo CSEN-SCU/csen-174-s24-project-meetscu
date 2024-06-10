@@ -3,14 +3,16 @@ import { View, Text, StyleSheet, Button } from 'react-native';
 import { GoogleSignin, GoogleSigninButton, statusCodes } from '@react-native-google-signin/google-signin';
 import UserContext from '../utils/UserContext';
 import AuthContext from '../utils/AuthContext';
+import AppNavigation from '../navigation/AppNavigation';
 import axios from 'axios';
 import signOut from '../utils/signOut';
 import { useNavigation } from '@react-navigation/native';
 
+
 export default function LoginScreen(){
-  const [error, setError] = useState(null);
-  const { isLoggedIn, setIsLoggedIn } = React.useContext(AuthContext);
+  const [error, setError] = useState();
   const { user, setUser } = React.useContext(UserContext);
+  const { isLoggedIn, setIsLoggedIn } = React.useContext(AuthContext);
   const navigation = useNavigation();
   const userSignOut = signOut();
 
@@ -40,54 +42,36 @@ export default function LoginScreen(){
 
   const sendUser = async (user) => {
     try{
-      // try logging in first, if user does not exist, send new user data to backend
-      const logInResponse = await axios.get(
-        "http://127.0.0.1:5000/getUser", {
-          params: {
-            email: user.email,
-            name: user.name,
-            photo: user.photo
-          }
+      const logInResponse = await axios.post(
+        "http://127.0.0.1:5000/loggedIn",
+        {
+          email: user.email,
+          name: user.name,
+          photo: user.photo
         }
       );
-      if(logInResponse.status === 200){
-        // successfully logged in
+      if(logInResponse.status == 200){
         console.log("User logged in");
         setIsLoggedIn(true);
         setUser(logInResponse.data);
-      } else if(logInResponse.status === 204){
-        // cannnot find user in database so send new user data
-        console.log("Create new user");
-        const sendUserDataResponse = await axios.post(
-          "http://127.0.0.1:5000/loggedIn",
-          {
-            email: user.email,
-            name: user.name,
-            photo: user.photo
-          }
-        );
-        if(sendUserDataResponse.status === 200){
-          // successfully sent new data
-          setIsLoggedIn(true);
-          setUser(sendUserDataResponse.data);
-        } else {
-          // error in creating profile
-          console.error("Failed to send user data to backend");
-        }
       } else {
-        // error in logging in
-        console.error("Failed to log in user")
+        console.log("Error logging in");
+        setError("Error logging in. Please try again.");
+        userSignOut();
       }
+
     } catch(error){
       console.log(error);
     }
   }
 
   useEffect(() => {
+    if(isLoggedIn && user && user.email){
+      navigation.navigate('Main');
+    }
     if(!isLoggedIn && user && user.email && user.email.endsWith("@scu.edu")){
       // if SCU email set user and insert into database
       sendUser(user);
-      navigation.navigate('Main');
     }
     if(!isLoggedIn && user && user.email && !user.email.endsWith("@scu.edu")){
       // not an SCU email
